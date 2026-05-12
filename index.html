@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <title>MARATHON // TRAINER</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -143,18 +144,61 @@
             <p class="text-cyber-gray-400 text-lg tracking-widest uppercase">专业马拉松训练数据分析系统</p>
         </header>
 
+        <div class="data-card rounded-2xl p-6 glow-cyan mb-8">
+            <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
+                <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
+                个人信息
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">年龄 (岁)</label>
+                    <input type="number" id="age" value="20" min="10" max="100" 
+                        class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-cyan font-orbitron focus:outline-none focus:border-cyber-cyan transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">身高 (cm)</label>
+                    <input type="number" id="height" value="175" min="100" max="250" 
+                        class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-cyan font-orbitron focus:outline-none focus:border-cyber-cyan transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">体重 (kg)</label>
+                    <input type="number" id="weight" value="65" min="30" max="200" 
+                        class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-cyan font-orbitron focus:outline-none focus:border-cyber-cyan transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">BMI</label>
+                    <p id="bmiDisplay" class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-green font-orbitron">--</p>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">5K PB (分钟)</label>
+                    <input type="number" id="pb5k" step="0.1" min="10" max="60" placeholder="25"
+                        class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple font-orbitron focus:outline-none focus:border-cyber-purple transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">10K PB (分钟)</label>
+                    <input type="number" id="pb10k" step="0.1" min="20" max="120" placeholder="55"
+                        class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple font-orbitron focus:outline-none focus:border-cyber-purple transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">半马 PB (分钟)</label>
+                    <input type="number" id="pbHalf" step="0.1" min="60" max="240" placeholder="120"
+                        class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple font-orbitron focus:outline-none focus:border-cyber-purple transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">全马 PB (分钟)</label>
+                    <input type="number" id="pbFull" step="0.1" min="120" max="480" placeholder="240"
+                        class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple font-orbitron focus:outline-none focus:border-cyber-purple transition-colors">
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div class="data-card rounded-2xl p-6 glow-cyan">
                 <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
                     <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
-                    基础设置
+                    心率设置
                 </h2>
                 <div class="space-y-6">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-2 tracking-wider">年龄 (岁)</label>
-                        <input type="number" id="age" value="20" min="10" max="100" 
-                            class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-cyan font-orbitron focus:outline-none focus:border-cyber-cyan transition-colors">
-                    </div>
                     <div>
                         <label class="block text-sm text-gray-400 mb-2 tracking-wider">最大心率 (BPM)</label>
                         <div class="flex items-center gap-4">
@@ -256,6 +300,50 @@
             </div>
         </div>
 
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="data-card rounded-2xl p-6 glow-cyan">
+                <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
+                    <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
+                    训练里程趋势
+                </h2>
+                <div class="h-64">
+                    <canvas id="distanceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="data-card rounded-2xl p-6 glow-green">
+                <h2 class="font-orbitron text-xl text-cyber-green mb-6 flex items-center gap-3">
+                    <span class="w-2 h-2 bg-cyber-green rounded-full pulse-dot"></span>
+                    心率分布统计
+                </h2>
+                <div class="h-64">
+                    <canvas id="heartRateChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="data-card rounded-2xl p-6 glow-purple">
+                <h2 class="font-orbitron text-xl text-cyber-purple mb-6 flex items-center gap-3">
+                    <span class="w-2 h-2 bg-cyber-purple rounded-full pulse-dot"></span>
+                    配速分析
+                </h2>
+                <div class="h-64">
+                    <canvas id="paceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="data-card rounded-2xl p-6 glow-red">
+                <h2 class="font-orbitron text-xl text-cyber-red mb-6 flex items-center gap-3">
+                    <span class="w-2 h-2 bg-cyber-red rounded-full pulse-dot"></span>
+                    心率区间分布
+                </h2>
+                <div class="h-64">
+                    <canvas id="zoneChart"></canvas>
+                </div>
+            </div>
+        </div>
+
         <div class="data-card rounded-2xl p-6 glow-cyan">
             <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
                 <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
@@ -281,6 +369,60 @@
             <div id="emptyState" class="text-center py-12 text-gray-500">
                 <p class="font-orbitron text-lg mb-2">暂无训练数据</p>
                 <p class="text-sm">开始记录你的第一次训练吧</p>
+            </div>
+        </div>
+
+        <div class="data-card rounded-2xl p-6 glow-green mb-8">
+            <h2 class="font-orbitron text-xl text-cyber-green mb-6 flex items-center gap-3">
+                <span class="w-2 h-2 bg-cyber-green rounded-full pulse-dot"></span>
+                AI 训练助手
+                <span class="text-xs text-gray-500 font-rajdhani ml-auto">MARATHON // AI</span>
+            </h2>
+            
+            <div class="bg-cyber-dark rounded-xl overflow-hidden border border-cyber-green/20">
+                <div id="chatMessages" class="h-64 overflow-y-auto p-4 space-y-4">
+                    <div class="flex gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-green to-cyber-cyan flex items-center justify-center flex-shrink-0">
+                            <span class="font-orbitron text-lg">AI</span>
+                        </div>
+                        <div class="bg-cyber-gray rounded-lg px-4 py-3 max-w-[80%]">
+                            <p class="text-gray-200 text-sm">
+                                👋 你好！我是你的马拉松训练助手。告诉我你的训练目标，我来为你制定专属训练方案！
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">可以问："帮我制定一个月的训练计划" 或 "如何提高配速"</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-4 border-t border-cyber-green/20">
+                    <div class="flex gap-3">
+                        <input type="text" id="chatInput" placeholder="输入你的问题..."
+                            class="flex-1 bg-cyber-gray border border-cyber-green/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyber-green transition-colors">
+                        <button onclick="sendMessage()" 
+                            class="px-6 py-3 bg-gradient-to-r from-cyber-green to-cyber-cyan rounded-lg font-orbitron tracking-wider hover:opacity-90 transition-opacity">
+                            发送
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+                <button onclick="quickQuestion('weekly')" 
+                    class="px-4 py-2 bg-cyber-gray border border-cyber-cyan/30 rounded-lg text-sm text-gray-300 hover:border-cyber-cyan transition-colors">
+                    📅 周训练计划
+                </button>
+                <button onclick="quickQuestion('pace')" 
+                    class="px-4 py-2 bg-cyber-gray border border-cyber-cyan/30 rounded-lg text-sm text-gray-300 hover:border-cyber-cyan transition-colors">
+                    ⚡ 提高配速
+                </button>
+                <button onclick="quickQuestion('longrun')" 
+                    class="px-4 py-2 bg-cyber-gray border border-cyber-cyan/30 rounded-lg text-sm text-gray-300 hover:border-cyber-cyan transition-colors">
+                    🏃 长距离训练
+                </button>
+                <button onclick="quickQuestion('recovery')" 
+                    class="px-4 py-2 bg-cyber-gray border border-cyber-cyan/30 rounded-lg text-sm text-gray-300 hover:border-cyber-cyan transition-colors">
+                    🧘 恢复建议
+                </button>
             </div>
         </div>
 
@@ -316,6 +458,7 @@
 
         let trainingRecords = JSON.parse(localStorage.getItem('marathonTraining') || '[]');
         let deferredPrompt;
+        let charts = {};
 
         function init() {
             const today = new Date().toISOString().split('T')[0];
@@ -325,6 +468,7 @@
             updateHrZones();
             renderTrainingTable();
             calculateEstimatedTime();
+            initPersonalInfo();
 
             document.getElementById('age').addEventListener('input', updateMaxHr);
             document.getElementById('maxHrSlider').addEventListener('input', updateMaxHrFromSlider);
@@ -332,6 +476,15 @@
             document.getElementById('targetMin').addEventListener('input', calculateEstimatedTime);
             document.getElementById('targetSec').addEventListener('input', calculateEstimatedTime);
             document.getElementById('targetDistance').addEventListener('input', calculateEstimatedTime);
+            document.getElementById('height').addEventListener('input', () => { calculateBMI(); savePersonalInfo(); });
+            document.getElementById('weight').addEventListener('input', () => { calculateBMI(); savePersonalInfo(); });
+            document.getElementById('pb5k').addEventListener('input', savePersonalInfo);
+            document.getElementById('pb10k').addEventListener('input', savePersonalInfo);
+            document.getElementById('pbHalf').addEventListener('input', savePersonalInfo);
+            document.getElementById('pbFull').addEventListener('input', savePersonalInfo);
+            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
 
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js')
@@ -344,6 +497,460 @@
                 deferredPrompt = e;
                 setTimeout(() => showInstallBanner(), 3000);
             });
+
+            initCharts();
+        }
+
+        function initCharts() {
+            destroyCharts();
+
+            const cyberColors = {
+                cyan: '#00f0ff',
+                green: '#00ff88',
+                red: '#ff2d6a',
+                purple: '#b829ff',
+                yellow: '#ffe600',
+                emerald: '#10b981',
+                dark: '#1a1a2e'
+            };
+
+            const sortedRecords = [...trainingRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const labels = sortedRecords.map(r => {
+                const d = new Date(r.date);
+                return `${d.getMonth() + 1}/${d.getDate()}`;
+            });
+
+            if (sortedRecords.length === 0) {
+                return;
+            }
+
+            charts.distance = new Chart(document.getElementById('distanceChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '训练距离 (km)',
+                        data: sortedRecords.map(r => r.distance),
+                        borderColor: cyberColors.cyan,
+                        backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: cyberColors.cyan,
+                        pointBorderColor: '#0a0a0f',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#00f0ff', font: { family: 'Orbitron' } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(0, 240, 255, 0.1)' },
+                            ticks: { color: '#6b7280', font: { family: 'Rajdhani' } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(0, 240, 255, 0.1)' },
+                            ticks: { color: '#6b7280', font: { family: 'Rajdhani' } },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const hrData = sortedRecords.filter(r => r.avgHr).map(r => r.avgHr);
+            charts.heartRate = new Chart(document.getElementById('heartRateChart'), {
+                type: 'bar',
+                data: {
+                    labels: sortedRecords.filter(r => r.avgHr).map(r => {
+                        const d = new Date(r.date);
+                        return `${d.getMonth() + 1}/${d.getDate()}`;
+                    }),
+                    datasets: [{
+                        label: '平均心率 (BPM)',
+                        data: hrData,
+                        backgroundColor: cyberColors.green,
+                        borderColor: '#0a0a0f',
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#00ff88', font: { family: 'Orbitron' } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(0, 255, 136, 0.1)' },
+                            ticks: { color: '#6b7280', font: { family: 'Rajdhani' } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(0, 255, 136, 0.1)' },
+                            ticks: { color: '#6b7280', font: { family: 'Rajdhani' } },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const paceData = sortedRecords.map(r => {
+                const [min, sec] = r.pace.split(':');
+                return parseInt(min) + parseInt(sec) / 60;
+            });
+            charts.pace = new Chart(document.getElementById('paceChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '配速 (min/km)',
+                        data: paceData,
+                        borderColor: cyberColors.purple,
+                        backgroundColor: 'rgba(184, 41, 255, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: cyberColors.purple,
+                        pointBorderColor: '#0a0a0f',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#b829ff', font: { family: 'Orbitron' } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(184, 41, 255, 0.1)' },
+                            ticks: { color: '#6b7280', font: { family: 'Rajdhani' } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(184, 41, 255, 0.1)' },
+                            ticks: { color: '#6b7280', font: { family: 'Rajdhani' } },
+                            reverse: true,
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+
+            const zoneCounts = [0, 0, 0, 0, 0];
+            trainingRecords.forEach(r => {
+                if (r.zone && r.zone > 0 && r.zone <= 5) {
+                    zoneCounts[r.zone - 1]++;
+                }
+            });
+            charts.zone = new Chart(document.getElementById('zoneChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['恢复区', '脂肪燃烧区', '有氧耐力区', '乳酸阈值区', '极限强度区'],
+                    datasets: [{
+                        data: zoneCounts,
+                        backgroundColor: [
+                            cyberColors.emerald,
+                            cyberColors.cyan,
+                            cyberColors.green,
+                            cyberColors.yellow,
+                            cyberColors.red
+                        ],
+                        borderColor: '#0a0a0f',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { 
+                                color: '#fff', 
+                                font: { family: 'Rajdhani', size: 12 },
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function destroyCharts() {
+            Object.keys(charts).forEach(key => {
+                if (charts[key]) {
+                    charts[key].destroy();
+                }
+            });
+            charts = {};
+        }
+
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById('height').value) / 100;
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            if (height > 0 && weight > 0) {
+                const bmi = weight / (height * height);
+                const bmiDisplay = document.getElementById('bmiDisplay');
+                bmiDisplay.textContent = bmi.toFixed(1);
+                
+                if (bmi < 18.5) {
+                    bmiDisplay.style.color = '#b829ff';
+                } else if (bmi < 24) {
+                    bmiDisplay.style.color = '#00ff88';
+                } else if (bmi < 28) {
+                    bmiDisplay.style.color = '#ffe600';
+                } else {
+                    bmiDisplay.style.color = '#ff2d6a';
+                }
+            }
+        }
+
+        function initPersonalInfo() {
+            const saved = localStorage.getItem('marathonPersonalInfo');
+            if (saved) {
+                const info = JSON.parse(saved);
+                document.getElementById('height').value = info.height || 175;
+                document.getElementById('weight').value = info.weight || 65;
+                document.getElementById('pb5k').value = info.pb5k || '';
+                document.getElementById('pb10k').value = info.pb10k || '';
+                document.getElementById('pbHalf').value = info.pbHalf || '';
+                document.getElementById('pbFull').value = info.pbFull || '';
+            }
+            calculateBMI();
+        }
+
+        function savePersonalInfo() {
+            const info = {
+                height: parseFloat(document.getElementById('height').value),
+                weight: parseFloat(document.getElementById('weight').value),
+                pb5k: parseFloat(document.getElementById('pb5k').value) || null,
+                pb10k: parseFloat(document.getElementById('pb10k').value) || null,
+                pbHalf: parseFloat(document.getElementById('pbHalf').value) || null,
+                pbFull: parseFloat(document.getElementById('pbFull').value) || null
+            };
+            localStorage.setItem('marathonPersonalInfo', JSON.stringify(info));
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatMessages = document.getElementById('chatMessages');
+            
+            chatMessages.innerHTML += `
+                <div class="flex gap-3 justify-end">
+                    <div class="bg-gradient-to-r from-cyber-purple to-cyber-cyan rounded-lg px-4 py-3 max-w-[80%]">
+                        <p class="text-white text-sm">${message}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-purple to-cyber-red flex items-center justify-center flex-shrink-0">
+                        <span class="font-orbitron text-lg">U</span>
+                    </div>
+                </div>
+            `;
+            
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            setTimeout(() => {
+                const response = generateAIResponse(message);
+                chatMessages.innerHTML += `
+                    <div class="flex gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-green to-cyber-cyan flex items-center justify-center flex-shrink-0">
+                            <span class="font-orbitron text-lg">AI</span>
+                        </div>
+                        <div class="bg-cyber-gray rounded-lg px-4 py-3 max-w-[80%]">
+                            <p class="text-gray-200 text-sm">${response}</p>
+                        </div>
+                    </div>
+                `;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 800);
+        }
+
+        function quickQuestion(type) {
+            const questions = {
+                weekly: '帮我制定一周的马拉松训练计划',
+                pace: '如何提高我的跑步配速？',
+                longrun: '长距离跑步训练有什么技巧？',
+                recovery: '训练后如何进行恢复？'
+            };
+            document.getElementById('chatInput').value = questions[type];
+            sendMessage();
+        }
+
+        function generateAIResponse(message) {
+            const responses = {
+                '训练计划': `
+**一周训练计划建议：**
+
+📅 **周一：轻松跑**
+- 距离：5-8 km
+- 配速：比目标马拉松配速慢 30-45 秒/km
+- 心率：Zone 2 (60-70%)
+
+📅 **周二：速度训练**
+- 热身：2 km
+- 间歇：8 x 400m（目标配速）
+- 恢复：每组休息 2-3 分钟
+- 放松：2 km
+
+📅 **周三：休息或交叉训练**
+- 游泳、骑行或瑜伽
+
+📅 **周四：节奏跑**
+- 距离：8-12 km
+- 配速：比目标马拉松配速慢 10-15 秒/km
+- 心率：Zone 3-4 (70-85%)
+
+📅 **周五：轻松跑**
+- 距离：4-6 km
+- 配速：轻松舒适
+
+📅 **周六：长距离跑**
+- 距离：逐步增加（15-30 km）
+- 配速：比目标配速慢 30-60 秒/km
+
+📅 **周日：休息或恢复跑**
+- 轻松散步或短距离慢跑
+                `.trim(),
+                '配速': `
+**提高配速的方法：**
+
+⚡ **1. 速度训练**
+- 间歇跑：400m/800m 重复跑
+- 法特莱克跑：快慢交替
+
+⚡ **2. 力量训练**
+- 深蹲、弓步、提踵
+- 核心训练：平板支撑、俄罗斯转体
+
+⚡ **3. 技术改进**
+- 步频：每分钟 170-180 步
+- 步幅：适当缩短，提高效率
+
+⚡ **4. 训练建议**
+- 每周进行 1-2 次速度训练
+- 保持足够的恢复时间
+- 逐渐增加训练强度
+
+⚡ **5. 比赛策略**
+- 前半程保持稳定
+- 避免一开始冲太快
+                `.trim(),
+                '长距离': `
+**长距离跑步技巧：**
+
+🏃 **1. 配速策略**
+- 开始时比目标配速慢 30-60 秒
+- 保持匀速，避免忽快忽慢
+
+🏃 **2. 补给计划**
+- 每 45-60 分钟补充能量胶
+- 每公里喝 100-150ml 水或运动饮料
+
+🏃 **3. 装备选择**
+- 穿已磨合的跑鞋
+- 使用防摩擦膏预防水泡
+- 穿透气速干衣物
+
+🏃 **4. 心理准备**
+- 分段目标：每 5 km 一个小目标
+- 保持积极心态
+- 享受跑步过程
+
+🏃 **5. 恢复重点**
+- 跑完后及时拉伸
+- 补充蛋白质和碳水
+- 保证充足睡眠
+                `.trim(),
+                '恢复': `
+**训练后恢复指南：**
+
+🧘 **1. 即时恢复**
+- 慢跑放松 5-10 分钟
+- 动态拉伸（高抬腿、后踢腿）
+
+🧘 **2. 营养补充**
+- 训练后 30 分钟内补充蛋白质
+- 适量碳水化合物恢复糖原
+- 充足水分和电解质
+
+🧘 **3. 静态拉伸**
+- 重点拉伸：小腿、大腿、髂腰肌
+- 每个动作保持 20-30 秒
+
+🧘 **4. 恢复方法**
+- 泡沫轴按摩
+- 冷热交替浴
+- 睡眠 7-9 小时
+
+🧘 **5. 恢复时间**
+- 轻松跑后：1-2 天
+- 高强度训练后：2-3 天
+- 长距离跑后：3-4 天
+                `.trim(),
+                '目标': `
+**设定训练目标的建议：**
+
+🎯 **SMART 原则**
+- **S**pecific：具体的
+- **M**easurable：可衡量的
+- **A**chievable：可实现的
+- **R**elevant：相关的
+- **T**ime-bound：有时限的
+
+🎯 **示例目标**
+- 3个月内完成首个半程马拉松
+- 将10K PB提高到50分钟以内
+- 每周跑步3次，累计20公里
+
+🎯 **训练周期**
+- 基础期（4-6周）：建立跑量
+- 强化期（6-8周）：提高强度
+- 减量期（2-3周）：赛前调整
+
+🎯 **重要提示**
+- 循序渐进，避免受伤
+- 倾听身体的声音
+- 享受过程，庆祝进步
+                `.trim()
+            };
+
+            if (message.includes('训练计划') || message.includes('周计划') || message.includes('计划')) {
+                return responses['训练计划'];
+            } else if (message.includes('配速') || message.includes('速度') || message.includes('快')) {
+                return responses['配速'];
+            } else if (message.includes('长距离') || message.includes('长距离跑')) {
+                return responses['长距离'];
+            } else if (message.includes('恢复') || message.includes('休息') || message.includes('放松')) {
+                return responses['恢复'];
+            } else if (message.includes('目标') || message.includes('PB') || message.includes('成绩')) {
+                return responses['目标'];
+            } else {
+                return `
+感谢你的提问！我可以帮你制定训练计划、提高配速、解答长距离跑技巧和恢复建议。
+
+你可以问我：
+- "帮我制定一周训练计划"
+- "如何提高配速"
+- "长距离跑步有什么技巧"
+- "训练后如何恢复"
+
+或者直接告诉我你的具体目标，我来为你定制方案！
+                `.trim();
+            }
         }
 
         function showInstallBanner() {
@@ -516,6 +1123,7 @@
             if (trainingRecords.length === 0) {
                 tbody.innerHTML = '';
                 emptyState.style.display = 'block';
+                initCharts();
                 return;
             }
 
@@ -541,6 +1149,7 @@
                     </tr>
                 `;
             }).join('');
+            initCharts();
         }
 
         function clearInputs() {
