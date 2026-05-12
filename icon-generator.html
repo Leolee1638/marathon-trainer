@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Icon Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-900 text-white p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-4 text-cyan-400">PWA 图标生成器</h1>
+        <p class="text-gray-400 mb-8">点击下方按钮生成并下载图标，然后创建 icons 文件夹放入图标</p>
+        
+        <div class="space-y-4">
+            <button onclick="generateIcon(192)" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 rounded-lg font-bold">
+                生成 192x192 图标
+            </button>
+            <button onclick="generateIcon(512)" class="w-full py-3 bg-purple-600 hover:bg-purple-500 rounded-lg font-bold">
+                生成 512x512 图标
+            </button>
+            <button onclick="generateBoth()" class="w-full py-3 bg-gradient-to-r from-cyan-600 to-purple-600 hover:opacity-80 rounded-lg font-bold">
+                同时生成两个
+            </button>
+        </div>
+        
+        <div class="mt-8 p-4 bg-gray-800 rounded-lg">
+            <h2 class="text-xl font-bold mb-2">使用说明</h2>
+            <ol class="list-decimal list-inside text-gray-300 space-y-2 text-sm">
+                <li>点击上方按钮下载图标文件</li>
+                <li>在 index.html 同级目录创建 <code class="bg-gray-700 px-2 py-1 rounded">icons</code> 文件夹</li>
+                <li>将 <code class="bg-gray-700 px-2 py-1 rounded">icon-192.png</code> 和 <code class="bg-gray-700 px-2 py-1 rounded">icon-512.png</code> 放入 icons 文件夹</li>
+                <li>刷新页面即可看到安装提示</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        function createIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#00f0ff');
+            gradient.addColorStop(1, '#b829ff');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            ctx.fillStyle = '#0a0a0f';
+            ctx.font = `bold ${size * 0.4}px Orbitron, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('M', size / 2, size / 2);
+            
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = size * 0.03;
+            ctx.beginPath();
+            ctx.moveTo(size * 0.2, size * 0.7);
+            ctx.lineTo(size * 0.5, size * 0.85);
+            ctx.lineTo(size * 0.8, size * 0.7);
+            ctx.stroke();
+            
+            return canvas;
+        }
+        
+        function generateIcon(size) {
+            const canvas = createIcon(size);
+            const link = document.createElement('a');
+            link.download = `icon-${size}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        function generateBoth() {
+            generateIcon(192);
+            setTimeout(() => generateIcon(512), 500);
+        }
+    </script>
+</body>
+</html>

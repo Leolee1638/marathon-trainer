@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#00f0ff">
+    <meta name="description" content="专业马拉松训练数据分析系统">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Marathon">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>MARATHON // TRAINER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            dark: '#0a0a0f',
+                            darker: '#050508',
+                            cyan: '#00f0ff',
+                            green: '#00ff88',
+                            red: '#ff2d6a',
+                            purple: '#b829ff',
+                            yellow: '#ffe600',
+                            gray: '#1a1a2e',
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #050508 50%, #0a0a0f 100%);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 40px rgba(0, 240, 255, 0.1);
+        }
+        .glow-green {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1);
+        }
+        .glow-red {
+            box-shadow: 0 0 20px rgba(255, 45, 106, 0.3), 0 0 40px rgba(255, 45, 106, 0.1);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(184, 41, 255, 0.3), 0 0 40px rgba(184, 41, 255, 0.1);
+        }
+        .scan-line {
+            position: relative;
+            overflow: hidden;
+        }
+        .scan-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.05), transparent);
+            animation: scan 3s linear infinite;
+        }
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        .data-card {
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.8), rgba(10, 10, 15, 0.9));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        .neon-text {
+            text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type="range"]::-webkit-slider-track {
+            height: 8px;
+            background: #1a1a2e;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(145deg, #00f0ff, #0080ff);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+        .zone-bar {
+            transition: width 0.5s ease-out;
+        }
+        .pulse-dot {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .install-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.95), rgba(10, 10, 15, 0.98));
+            border-top: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 16px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            z-index: 1000;
+        }
+        .install-banner.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen font-rajdhani text-white grid-bg">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="text-center mb-12 scan-line">
+            <div class="flex items-center justify-center gap-4 mb-4">
+                <div class="h-px w-20 bg-gradient-to-r from-transparent to-cyber-cyan"></div>
+                <h1 class="font-orbitron text-4xl md:text-6xl font-black tracking-wider text-cyber-cyan neon-text">
+                    MARATHON<span class="text-cyber-green">//</span>TRAINER
+                </h1>
+                <div class="h-px w-20 bg-gradient-to-l from-transparent to-cyber-cyan"></div>
+            </div>
+            <p class="text-cyber-gray-400 text-lg tracking-widest uppercase">专业马拉松训练数据分析系统</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="data-card rounded-2xl p-6 glow-cyan">
+                <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
+                    <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
+                    基础设置
+                </h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2 tracking-wider">年龄 (岁)</label>
+                        <input type="number" id="age" value="20" min="10" max="100" 
+                            class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-cyan font-orbitron focus:outline-none focus:border-cyber-cyan transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2 tracking-wider">最大心率 (BPM)</label>
+                        <div class="flex items-center gap-4">
+                            <input type="range" id="maxHrSlider" min="140" max="220" value="200" 
+                                class="flex-1">
+                            <span id="maxHrDisplay" class="font-orbitron text-2xl text-cyber-red w-20 text-right">200</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">公式: 220 - 年龄 = <span id="calculatedMaxHr">200</span> BPM</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2 tracking-wider">静息心率 (BPM)</label>
+                        <input type="number" id="restingHr" value="60" min="40" max="100" 
+                            class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-green font-orbitron focus:outline-none focus:border-cyber-cyan transition-colors">
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-card rounded-2xl p-6 glow-green">
+                <h2 class="font-orbitron text-xl text-cyber-green mb-6 flex items-center gap-3">
+                    <span class="w-2 h-2 bg-cyber-green rounded-full pulse-dot"></span>
+                    心率区间计算
+                </h2>
+                <div class="space-y-4" id="hrZones">
+                </div>
+                <div class="mt-6 p-4 bg-cyber-dark/50 rounded-lg border border-cyber-green/20">
+                    <p class="text-sm text-gray-400">
+                        <span class="text-cyber-green">心率储备 (HRR):</span> 
+                        <span id="hrrValue" class="font-orbitron text-cyber-green ml-2">140</span> BPM
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">Karvonen公式: (最大心率 - 静息心率) × 强度% + 静息心率</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-card rounded-2xl p-6 glow-purple mb-8">
+            <h2 class="font-orbitron text-xl text-cyber-purple mb-6 flex items-center gap-3">
+                <span class="w-2 h-2 bg-cyber-purple rounded-full pulse-dot"></span>
+                训练记录输入
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">日期</label>
+                    <input type="date" id="trainingDate" 
+                        class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple focus:outline-none focus:border-cyber-purple transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">距离 (公里)</label>
+                    <input type="number" id="distance" step="0.01" min="0" placeholder="0.00"
+                        class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple focus:outline-none focus:border-cyber-purple transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">时间 (分钟)</label>
+                    <input type="number" id="duration" step="0.1" min="0" placeholder="0.0"
+                        class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple focus:outline-none focus:border-cyber-purple transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">平均心率 (BPM)</label>
+                    <input type="number" id="avgHeartRate" min="60" max="220" placeholder="0"
+                        class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple focus:outline-none focus:border-cyber-purple transition-colors">
+                </div>
+            </div>
+            <div class="mt-6 flex flex-wrap gap-4">
+                <button onclick="addTrainingRecord()" 
+                    class="px-8 py-3 bg-gradient-to-r from-cyber-purple to-cyber-cyan rounded-lg font-orbitron tracking-wider hover:opacity-90 transition-opacity glow-purple">
+                    + 添加记录
+                </button>
+                <button onclick="clearAllRecords()" 
+                    class="px-8 py-3 bg-cyber-dark border border-cyber-red/50 rounded-lg font-orbitron tracking-wider text-cyber-red hover:bg-cyber-red/10 transition-colors">
+                    清空数据
+                </button>
+            </div>
+        </div>
+
+        <div class="data-card rounded-2xl p-6 glow-red mb-8">
+            <h2 class="font-orbitron text-xl text-cyber-red mb-6 flex items-center gap-3">
+                <span class="w-2 h-2 bg-cyber-red rounded-full pulse-dot"></span>
+                实时配速计算器
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">目标配速 (分钟/公里)</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="targetMin" min="0" max="59" value="5" placeholder="分"
+                            class="w-full bg-cyber-dark border border-cyber-red/30 rounded-lg px-4 py-3 text-cyber-red text-center font-orbitron focus:outline-none focus:border-cyber-red">
+                        <span class="text-cyber-red text-2xl self-center">:</span>
+                        <input type="number" id="targetSec" min="0" max="59" value="0" placeholder="秒"
+                            class="w-full bg-cyber-dark border border-cyber-red/30 rounded-lg px-4 py-3 text-cyber-red text-center font-orbitron focus:outline-none focus:border-cyber-red">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">目标距离 (公里)</label>
+                    <input type="number" id="targetDistance" step="0.1" min="0" value="42.195" 
+                        class="w-full bg-cyber-dark border border-cyber-red/30 rounded-lg px-4 py-3 text-cyber-red font-orbitron focus:outline-none focus:border-cyber-red">
+                </div>
+                <div class="flex flex-col justify-center">
+                    <p class="text-sm text-gray-400 mb-2 tracking-wider">预计完赛时间</p>
+                    <p id="estimatedTime" class="font-orbitron text-3xl text-cyber-yellow neon-text">--:--:--</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-card rounded-2xl p-6 glow-cyan">
+            <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
+                <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
+                训练历史 <span id="recordCount" class="text-sm text-gray-500 font-rajdhani ml-2">(0 条记录)</span>
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-cyber-cyan/20 text-left">
+                            <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">日期</th>
+                            <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">距离</th>
+                            <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">时间</th>
+                            <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">配速</th>
+                            <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">平均心率</th>
+                            <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">心率区间</th>
+                            <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trainingTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div id="emptyState" class="text-center py-12 text-gray-500">
+                <p class="font-orbitron text-lg mb-2">暂无训练数据</p>
+                <p class="text-sm">开始记录你的第一次训练吧</p>
+            </div>
+        </div>
+
+        <footer class="text-center mt-12 py-6 border-t border-cyber-cyan/10">
+            <p class="text-gray-500 text-sm tracking-wider">MARATHON // TRAINER v1.0 | 本地数据存储</p>
+        </footer>
+    </div>
+
+    <div id="installBanner" class="install-banner">
+        <div class="flex items-center justify-between max-w-lg mx-auto">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">📱</span>
+                <div>
+                    <p class="font-orbitron text-cyber-cyan text-sm">安装到主屏幕</p>
+                    <p class="text-xs text-gray-400">离线也能使用</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="installApp()" class="px-4 py-2 bg-cyber-cyan text-cyber-dark font-orbitron text-sm rounded hover:opacity-80">安装</button>
+                <button onclick="hideInstallBanner()" class="px-4 py-2 bg-cyber-dark border border-gray-600 text-gray-400 font-orbitron text-sm rounded hover:border-gray-500">稍后</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const hrZoneColors = {
+            1: { bg: 'bg-emerald-500/20', border: 'border-emerald-500', text: 'text-emerald-400', bar: 'bg-emerald-500', name: '恢复区' },
+            2: { bg: 'bg-cyan-500/20', border: 'border-cyan-500', text: 'text-cyan-400', bar: 'bg-cyan-500', name: '脂肪燃烧区' },
+            3: { bg: 'bg-green-500/20', border: 'border-green-500', text: 'text-green-400', bar: 'bg-green-500', name: '有氧耐力区' },
+            4: { bg: 'bg-yellow-500/20', border: 'border-yellow-500', text: 'text-yellow-400', bar: 'bg-yellow-500', name: '乳酸阈值区' },
+            5: { bg: 'bg-red-500/20', border: 'border-red-500', text: 'text-red-400', bar: 'bg-red-500', name: '极限强度区' }
+        };
+
+        let trainingRecords = JSON.parse(localStorage.getItem('marathonTraining') || '[]');
+        let deferredPrompt;
+
+        function init() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('trainingDate').value = today;
+            
+            updateMaxHr();
+            updateHrZones();
+            renderTrainingTable();
+            calculateEstimatedTime();
+
+            document.getElementById('age').addEventListener('input', updateMaxHr);
+            document.getElementById('maxHrSlider').addEventListener('input', updateMaxHrFromSlider);
+            document.getElementById('restingHr').addEventListener('input', updateHrZones);
+            document.getElementById('targetMin').addEventListener('input', calculateEstimatedTime);
+            document.getElementById('targetSec').addEventListener('input', calculateEstimatedTime);
+            document.getElementById('targetDistance').addEventListener('input', calculateEstimatedTime);
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW registration failed:', err));
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                setTimeout(() => showInstallBanner(), 3000);
+            });
+        }
+
+        function showInstallBanner() {
+            document.getElementById('installBanner').classList.add('show');
+        }
+
+        function hideInstallBanner() {
+            document.getElementById('installBanner').classList.remove('show');
+        }
+
+        async function installApp() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            hideInstallBanner();
+        }
+
+        function updateMaxHr() {
+            const age = parseInt(document.getElementById('age').value) || 20;
+            const calculatedMaxHr = 220 - age;
+            document.getElementById('maxHrSlider').value = calculatedMaxHr;
+            document.getElementById('maxHrDisplay').textContent = calculatedMaxHr;
+            document.getElementById('calculatedMaxHr').textContent = calculatedMaxHr;
+            updateHrZones();
+        }
+
+        function updateMaxHrFromSlider() {
+            const maxHr = parseInt(document.getElementById('maxHrSlider').value);
+            document.getElementById('maxHrDisplay').textContent = maxHr;
+            document.getElementById('calculatedMaxHr').textContent = maxHr;
+            updateHrZones();
+        }
+
+        function calculateHrZone(heartRate) {
+            const maxHr = parseInt(document.getElementById('maxHrSlider').value) || 200;
+            const restingHr = parseInt(document.getElementById('restingHr').value) || 60;
+            const hrr = maxHr - restingHr;
+            
+            const zone1 = Math.round(restingHr + hrr * 0.5);
+            const zone2 = Math.round(restingHr + hrr * 0.6);
+            const zone3 = Math.round(restingHr + hrr * 0.7);
+            const zone4 = Math.round(restingHr + hrr * 0.8);
+            const zone5 = Math.round(restingHr + hrr * 0.9);
+
+            if (heartRate < zone1) return 0;
+            if (heartRate < zone2) return 1;
+            if (heartRate < zone3) return 2;
+            if (heartRate < zone4) return 3;
+            if (heartRate < zone5) return 4;
+            return 5;
+        }
+
+        function updateHrZones() {
+            const maxHr = parseInt(document.getElementById('maxHrSlider').value) || 200;
+            const restingHr = parseInt(document.getElementById('restingHr').value) || 60;
+            const hrr = maxHr - restingHr;
+            
+            document.getElementById('hrrValue').textContent = hrr;
+
+            const zones = [
+                { min: 0.50, max: 0.60, name: 'Zone 1 - 恢复区', desc: '50-60% 最大心率' },
+                { min: 0.60, max: 0.70, name: 'Zone 2 - 脂肪燃烧区', desc: '60-70% 最大心率' },
+                { min: 0.70, max: 0.80, name: 'Zone 3 - 有氧耐力区', desc: '70-80% 最大心率' },
+                { min: 0.80, max: 0.90, name: 'Zone 4 - 乳酸阈值区', desc: '80-90% 最大心率' },
+                { min: 0.90, max: 1.00, maxIncl: true, name: 'Zone 5 - 极限强度区', desc: '90-100% 最大心率' }
+            ];
+
+            const container = document.getElementById('hrZones');
+            container.innerHTML = zones.map((zone, idx) => {
+                const zoneNum = idx + 1;
+                const color = hrZoneColors[zoneNum];
+                const minBpm = Math.round(restingHr + hrr * zone.min);
+                const maxBpm = zone.maxIncl ? maxHr : Math.round(restingHr + hrr * zone.max);
+                const width = (zone.max - zone.min) * 100;
+
+                return `
+                    <div class="${color.bg} border ${color.border} rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="${color.text} font-orbitron text-sm">${zone.name}</span>
+                            <span class="${color.text} font-rajdhani text-lg">${minBpm}-${maxBpm} BPM</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mb-2">${zone.desc}</div>
+                        <div class="h-2 bg-cyber-dark rounded-full overflow-hidden">
+                            <div class="zone-bar h-full ${color.bar} rounded-full" style="width: ${width}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculatePace(distance, duration) {
+            if (!distance || distance === 0) return '0:00';
+            const paceMin = Math.floor(duration / distance);
+            const paceSec = Math.round((duration / distance - paceMin) * 60);
+            return `${paceMin}:${paceSec.toString().padStart(2, '0')}`;
+        }
+
+        function formatDuration(minutes) {
+            const hrs = Math.floor(minutes / 60);
+            const mins = Math.floor(minutes % 60);
+            const secs = Math.round((minutes - Math.floor(minutes)) * 60);
+            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function calculateEstimatedTime() {
+            const min = parseInt(document.getElementById('targetMin').value) || 0;
+            const sec = parseInt(document.getElementById('targetSec').value) || 0;
+            const dist = parseFloat(document.getElementById('targetDistance').value) || 0;
+            
+            if (min > 0 || sec > 0) {
+                const paceInMin = min + sec / 60;
+                const totalTime = paceInMin * dist;
+                document.getElementById('estimatedTime').textContent = formatDuration(totalTime);
+            }
+        }
+
+        function addTrainingRecord() {
+            const date = document.getElementById('trainingDate').value;
+            const distance = parseFloat(document.getElementById('distance').value);
+            const duration = parseFloat(document.getElementById('duration').value);
+            const avgHr = parseInt(document.getElementById('avgHeartRate').value);
+
+            if (!date || !distance || !duration) {
+                alert('请填写日期、距离和时间');
+                return;
+            }
+
+            const record = {
+                id: Date.now(),
+                date,
+                distance,
+                duration,
+                avgHr: avgHr || null,
+                pace: calculatePace(distance, duration),
+                zone: avgHr ? calculateHrZone(avgHr) : null
+            };
+
+            trainingRecords.unshift(record);
+            saveRecords();
+            renderTrainingTable();
+            clearInputs();
+        }
+
+        function deleteRecord(id) {
+            trainingRecords = trainingRecords.filter(r => r.id !== id);
+            saveRecords();
+            renderTrainingTable();
+        }
+
+        function clearAllRecords() {
+            if (confirm('确定要清空所有训练记录吗？')) {
+                trainingRecords = [];
+                saveRecords();
+                renderTrainingTable();
+            }
+        }
+
+        function saveRecords() {
+            localStorage.setItem('marathonTraining', JSON.stringify(trainingRecords));
+        }
+
+        function renderTrainingTable() {
+            const tbody = document.getElementById('trainingTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const recordCount = document.getElementById('recordCount');
+
+            recordCount.textContent = `(${trainingRecords.length} 条记录)`;
+
+            if (trainingRecords.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            tbody.innerHTML = trainingRecords.map(record => {
+                const zoneInfo = record.zone ? hrZoneColors[record.zone] : null;
+                const zoneBadge = zoneInfo 
+                    ? `<span class="px-2 py-1 ${zoneInfo.bg} ${zoneInfo.text} text-xs rounded font-orbitron">${zoneInfo.name.split(' - ')[0]}</span>`
+                    : '<span class="text-gray-500 text-xs">-</span>';
+
+                return `
+                    <tr class="border-b border-cyber-cyan/10 hover:bg-cyber-cyan/5 transition-colors">
+                        <td class="py-4 px-4 font-rajdhani">${record.date}</td>
+                        <td class="py-4 px-4 font-orbitron text-cyber-green">${record.distance.toFixed(2)} km</td>
+                        <td class="py-4 px-4 font-rajdhani">${formatDuration(record.duration)}</td>
+                        <td class="py-4 px-4 font-orbitron text-cyber-cyan">${record.pace} /km</td>
+                        <td class="py-4 px-4 font-orbitron ${record.avgHr ? 'text-cyber-red' : 'text-gray-500'}">${record.avgHr || '-'}</td>
+                        <td class="py-4 px-4">${zoneBadge}</td>
+                        <td class="py-4 px-4">
+                            <button onclick="deleteRecord(${record.id})" 
+                                class="text-cyber-red hover:text-cyber-red/80 text-sm transition-colors">删除</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function clearInputs() {
+            document.getElementById('distance').value = '';
+            document.getElementById('duration').value = '';
+            document.getElementById('avgHeartRate').value = '';
+        }
+
+        init();
+    </script>
+</body>
+</html>
