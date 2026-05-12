@@ -133,7 +133,13 @@
 </head>
 <body class="min-h-screen font-rajdhani text-white grid-bg">
     <div class="container mx-auto px-4 py-8 max-w-7xl">
-        <header class="text-center mb-12 scan-line">
+        <header class="text-center mb-12 scan-line relative">
+            <button onclick="showApiKeyModal()" class="absolute top-0 right-0 p-2 text-gray-400 hover:text-cyber-cyan transition-colors" title="API 设置">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </button>
             <div class="flex items-center justify-center gap-4 mb-4">
                 <div class="h-px w-20 bg-gradient-to-r from-transparent to-cyber-cyan"></div>
                 <h1 class="font-orbitron text-4xl md:text-6xl font-black tracking-wider text-cyber-cyan neon-text">
@@ -431,6 +437,34 @@
         </footer>
     </div>
 
+    <div id="apiKeyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center">
+        <div class="data-card rounded-2xl p-8 max-w-md w-full mx-4 glow-cyan">
+            <h2 class="font-orbitron text-2xl text-cyber-cyan mb-6 text-center">API 设置</h2>
+            <p class="text-gray-400 text-sm mb-6">
+                请输入你的 DeepSeek API Key，用于启用 AI 训练助手功能。
+                <br><span class="text-cyber-red">⚠️ 注意：这将保存在浏览器本地，请勿在公共设备上使用。</span>
+            </p>
+            <div class="mb-6">
+                <label class="block text-sm text-gray-400 mb-2">DeepSeek API Key</label>
+                <input type="password" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxx"
+                    class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-cyan font-mono focus:outline-none focus:border-cyber-cyan transition-colors">
+            </div>
+            <div class="flex gap-3">
+                <button onclick="saveApiKey()" class="flex-1 px-6 py-3 bg-gradient-to-r from-cyber-green to-cyber-cyan rounded-lg font-orbitron tracking-wider hover:opacity-90 transition-opacity">
+                    保存
+                </button>
+                <button onclick="hideApiKeyModal()" class="px-6 py-3 bg-cyber-dark border border-gray-600 text-gray-400 font-orbitron rounded hover:border-gray-500 transition-colors">
+                    取消
+                </button>
+            </div>
+            <div class="mt-6 text-center">
+                <a href="https://platform.deepseek.com/api_keys" target="_blank" class="text-cyber-cyan hover:underline text-sm">
+                    获取 API Key →
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div id="installBanner" class="install-banner">
         <div class="flex items-center justify-between max-w-lg mx-auto">
             <div class="flex items-center gap-3">
@@ -499,6 +533,33 @@
             });
 
             initCharts();
+        }
+
+        function showApiKeyModal() {
+            const modal = document.getElementById('apiKeyModal');
+            const input = document.getElementById('apiKeyInput');
+            const savedKey = localStorage.getItem('deepseek_api_key');
+            if (savedKey) {
+                input.value = savedKey;
+            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            input.focus();
+        }
+
+        function hideApiKeyModal() {
+            const modal = document.getElementById('apiKeyModal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            const key = input.value.trim();
+            if (key) {
+                localStorage.setItem('deepseek_api_key', key);
+                hideApiKeyModal();
+            }
         }
 
         function initCharts() {
@@ -752,7 +813,7 @@
             chatMessages.innerHTML += `
                 <div class="flex gap-3 justify-end">
                     <div class="bg-gradient-to-r from-cyber-purple to-cyber-cyan rounded-lg px-4 py-3 max-w-[80%]">
-                        <p class="text-white text-sm">${message}</p>
+                        <p class="text-white text-sm">${escapeHtml(message)}</p>
                     </div>
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-purple to-cyber-red flex items-center justify-center flex-shrink-0">
                         <span class="font-orbitron text-lg">U</span>
@@ -763,20 +824,107 @@
             input.value = '';
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            setTimeout(() => {
-                const response = generateAIResponse(message);
-                chatMessages.innerHTML += `
-                    <div class="flex gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-green to-cyber-cyan flex items-center justify-center flex-shrink-0">
-                            <span class="font-orbitron text-lg">AI</span>
-                        </div>
-                        <div class="bg-cyber-gray rounded-lg px-4 py-3 max-w-[80%]">
-                            <p class="text-gray-200 text-sm">${response}</p>
-                        </div>
-                    </div>
-                `;
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'flex gap-3';
+            loadingDiv.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-green to-cyber-cyan flex items-center justify-center flex-shrink-0">
+                    <span class="font-orbitron text-lg">AI</span>
+                </div>
+                <div class="bg-cyber-gray rounded-lg px-4 py-3 max-w-[80%]">
+                    <p class="text-gray-400 text-sm">思考中...</p>
+                </div>
+            `;
+            chatMessages.appendChild(loadingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            callDeepSeekAPI(message).then(response => {
+                loadingDiv.querySelector('.bg-cyber-gray').innerHTML = `<p class="text-gray-200 text-sm whitespace-pre-wrap">${response}</p>`;
                 chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 800);
+            }).catch(error => {
+                loadingDiv.querySelector('.bg-cyber-gray').innerHTML = `<p class="text-cyber-red text-sm">抱歉，出现了错误：${escapeHtml(error.message)}</p>`;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function callDeepSeekAPI(message) {
+            const apiKey = localStorage.getItem('deepseek_api_key');
+            
+            if (!apiKey) {
+                return `⚠️ 请先配置 DeepSeek API Key！
+
+点击右上角设置按钮，或在浏览器控制台运行：
+localStorage.setItem('deepseek_api_key', '你的API Key')
+
+获取 API Key：platform.deepseek.com`;
+            }
+
+            const userInfo = getUserInfo();
+            const systemPrompt = `你是一位专业的马拉松训练教练，名字叫 MARATHON AI。你的任务是帮助用户制定训练计划、解答跑步相关问题。
+
+用户信息：
+- 年龄: ${userInfo.age}岁
+- 最大心率: ${userInfo.maxHr} BPM
+- 静息心率: ${userInfo.restingHr} BPM
+- 心率储备: ${userInfo.hrr} BPM
+- 身高: ${userInfo.height}cm
+- 体重: ${userInfo.weight}kg
+- BMI: ${userInfo.bmi}
+- 5K PB: ${userInfo.pb5k ? userInfo.pb5k + '分钟' : '未设置'}
+- 10K PB: ${userInfo.pb10k ? userInfo.pb10k + '分钟' : '未设置'}
+- 半马 PB: ${userInfo.pbHalf ? userInfo.pbHalf + '分钟' : '未设置'}
+- 全马 PB: ${userInfo.pbFull ? userInfo.pbFull + '分钟' : '未设置'}
+
+请根据用户的信息给出专业的训练建议。使用中文回复，语气友好专业。可以使用 Markdown 格式来组织内容（如标题、列表、加粗等）。`;
+
+            const response = await fetch('https://api.deepseek.com/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-chat',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: message }
+                    ],
+                    stream: false
+                })
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('API Key 无效或已过期');
+                } else if (response.status === 429) {
+                    throw new Error('请求过于频繁，请稍后再试');
+                }
+                throw new Error(`API 请求失败: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.choices[0].message.content;
+        }
+
+        function getUserInfo() {
+            const age = parseInt(document.getElementById('age')?.value) || 20;
+            const maxHr = parseInt(document.getElementById('maxHrSlider')?.value) || (220 - age);
+            const restingHr = parseInt(document.getElementById('restingHr')?.value) || 60;
+            const hrr = maxHr - restingHr;
+            const height = parseFloat(document.getElementById('height')?.value) || 175;
+            const weight = parseFloat(document.getElementById('weight')?.value) || 65;
+            const bmi = height > 0 ? (weight / Math.pow(height / 100, 2)).toFixed(1) : '--';
+            const pb5k = document.getElementById('pb5k')?.value || null;
+            const pb10k = document.getElementById('pb10k')?.value || null;
+            const pbHalf = document.getElementById('pbHalf')?.value || null;
+            const pbFull = document.getElementById('pbFull')?.value || null;
+
+            return { age, maxHr, restingHr, hrr, height, weight, bmi, pb5k, pb10k, pbHalf, pbFull };
         }
 
         function quickQuestion(type) {
