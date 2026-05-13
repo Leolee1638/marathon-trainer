@@ -1,10 +1,7 @@
 const CACHE_NAME = 'marathon-trainer-v1';
 const urlsToCache = [
   '/',
-  '/index.html',
-  'https://cdn.tailwindcss.com',
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap'
+  '/index.html'
 ];
 
 self.addEventListener('install', event => {
@@ -28,7 +25,7 @@ self.addEventListener('fetch', event => {
         }
         return fetch(event.request)
           .then(response => {
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+            if (!response || response.status !== 200) {
               return response;
             }
             const responseToCache = response.clone();
