@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="description" content="专业马拉松训练数据分析系统">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Marathon">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>MARATHON // TRAINER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            dark: '#0a0a0a',
+                            darker: '#111111',
+                            darkest: '#000000',
+                            cyan: '#00f0ff',
+                            green: '#00ff88',
+                            red: '#ff4444',
+                            purple: '#b829ff',
+                            yellow: '#ffe600',
+                            orange: '#ff8c00',
+                            gray: '#1a1a1a',
+                            lightgray: '#333333',
+                        },
+                        dark: {
+                            900: '#0a0a0a',
+                            800: '#111111',
+                            700: '#1a1a1a',
+                            600: '#222222',
+                            500: '#2a2a2a',
+                            400: '#333333',
+                            300: '#444444',
+                            200: '#555555',
+                            100: '#888888',
+                            50: '#cccccc',
+                        },
+                        accent: {
+                            DEFAULT: '#ffffff',
+                            muted: '#888888',
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #0a0a0a;
+            --border-color: #333333;
+            --border-light: #444444;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #555555;
+            --accent-color: #ffffff;
+            --hover-bg: #222222;
+            --focus-ring: rgba(255, 255, 255, 0.2);
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --transition-speed: 0.3s;
+        }
+
+        .light-mode {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #eeeeee;
+            --bg-card: #ffffff;
+            --border-color: #e0e0e0;
+            --border-light: #dddddd;
+            --text-primary: #000000;
+            --text-secondary: #555555;
+            --text-muted: #999999;
+            --accent-color: #000000;
+            --hover-bg: #f0f0f0;
+            --focus-ring: rgba(0, 0, 0, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            transition: background-color var(--transition-speed) ease,
+                        border-color var(--transition-speed) ease,
+                        color var(--transition-speed) ease,
+                        box-shadow var(--transition-speed) ease;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .bg-primary { background-color: var(--bg-primary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .bg-tertiary { background-color: var(--bg-tertiary); }
+        .bg-card { background-color: var(--bg-card); }
+
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .text-muted { color: var(--text-muted); }
+        .text-accent { color: var(--accent-color); }
+
+        .border-default { border-color: var(--border-color); }
+        .border-light { border-color: var(--border-light); }
+
+        .hover-bg:hover { background-color: var(--hover-bg); }
+        .focus-ring:focus { box-shadow: 0 0 0 3px var(--focus-ring); }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--shadow-color);
+            border-color: var(--border-light);
+        }
+
+        .btn {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            background-color: var(--hover-bg);
+            border-color: var(--border-light);
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: var(--text-primary);
+            color: var(--bg-primary);
+            border-color: var(--text-primary);
+        }
+        .btn-primary:hover {
+            background-color: var(--text-secondary);
+            border-color: var(--text-secondary);
+        }
+
+        .input {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .input:focus {
+            border-color: var(--text-secondary);
+            box-shadow: 0 0 0 3px var(--focus-ring);
+        }
+        .input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .nav-item {
+            position: relative;
+            color: var(--text-secondary);
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .nav-item:hover {
+            color: var(--text-primary);
+        }
+        .nav-item.active {
+            color: var(--text-primary);
+        }
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background-color: var(--text-primary);
+            transition: width 0.3s ease;
+        }
+        .nav-item:hover::after,
+        .nav-item.active::after {
+            width: 80%;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .range-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            outline: none;
+        }
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        .range-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .table-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .table-header {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .table-row {
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        .table-row:hover {
+            background-color: var(--hover-bg);
+        }
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .tab-content {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: var(--border-light);
+        }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .theme-toggle {
+            width: 60px;
+            height: 32px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle-knob {
+            width: 26px;
+            height: 26px;
+            background-color: var(--text-primary);
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .light-mode .theme-toggle-knob {
+            transform: translateX(28px);
+        }
+
+        .pulse-indicator {
+            width: 8px;
+            height: 8px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .zone-indicator {
+            height: 24px;
+            border-radius: 4px;
+            transition: width 0.5s ease-out;
+        }
+        .zone-1 { background-color: #888888; }
+        .zone-2 { background-color: #aaaaaa; }
+        .zone-3 { background-color: #cccccc; }
+        .zone-4 { background-color: #eeeeee; }
+        .zone-5 { background-color: #ffffff; }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            word-wrap: break-word;
+        }
+        .chat-user {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-bottom-right-radius: 4px;
+        }
+        .chat-ai {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .quick-btn {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .quick-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+            border-color: var(--border-light);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-online {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+        .status-offline {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body class="font-rajdhani text-primary bg-primary scrollbar-custom">
+    <div class="min-h-screen flex flex-col">
+        <header class="bg-secondary/80 backdrop-blur-md border-b border-default sticky top-0 z-40">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-tertiary flex items-center justify-center">
+                            <span class="font-orbitron text-xl text-primary">M</span>
+                        </div>
+                        <div>
+                            <h1 class="font-orbitron text-xl font-black tracking-wider text-primary">
+                                MARATHON<span class="text-secondary mx-1">//</span>TRAINER
+                            </h1>
+                            <p class="text-muted text-xs tracking-widest">PRO TRAINING SYSTEM</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-muted text-sm">🌓</span>
+                            <div class="theme-toggle" onclick="toggleTheme()" role="button" aria-label="切换主题">
+                                <div class="theme-toggle-knob">
+                                    <span class="text-xs">🌙</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="showApiKeyModal()" class="p-2 text-secondary hover:text-primary transition-colors" title="API 设置">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="bg-secondary/60 backdrop-blur-md border-b border-default">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-wrap items-center justify-between">
+                    <div class="flex flex-wrap">
+                        <button onclick="showTab('profile', event)" class="nav-item active font-orbitron text-sm tracking-wider">
+                            👤 个人档案
+                        </button>
+                        <button onclick="showTab('heartRate', event)" class="nav-item font-orbitron text-sm tracking-wider">
+                            ❤️ 心率分析
+                        </button>
+                        <button onclick="showTab('training', event)" class="nav-item font-orbitron text-sm tracking-wider">
+                            📝 训练记录
+                        </button>
+                        <button onclick="showTab('analytics', event)" class="nav-item font-orbitron text-sm tracking-wider">
+                            📊 数据分析
+                        </button>
+                        <button onclick="showTab('ai', event)" class="nav-item font-orbitron text-sm tracking-wider">
+                            🤖 AI助手
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-4 ml-auto">
+                        <span id="onlineStatus" class="text-secondary text-sm font-mono flex items-center gap-2">
+                            <span class="pulse-indicator"></span>
+                            <span id="statusText">在线</span>
+                        </span>
+                        <span class="text-muted text-xs">v2.0</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="flex-1 container mx-auto px-4 py-8">
+            <div id="profileTab" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                        <div class="card">
+                            <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
+                                <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
+                                基本信息
+                            </h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div>
+                                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">年龄 (岁)</label>
+                                    <input type="number" id="age" value="20" min="10" max="100" 
+                                        class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-cyan font-orbitron focus:outline-none focus:border-cyber-cyan transition-colors">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">身高 (cm)</label>
+                                    <input type="number" id="height" value="175" min="100" max="250" 
+                                        class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-cyan font-orbitron focus:outline-none focus:border-cyber-cyan transition-colors">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">体重 (kg)</label>
+                                    <input type="number" id="weight" value="65" min="30" max="200" 
+                                        class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-cyan font-orbitron focus:outline-none focus:border-cyber-cyan transition-colors">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-400 mb-2 tracking-wider">BMI</label>
+                                    <p id="bmiDisplay" class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 font-orbitron">--</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2 class="font-orbitron text-xl text-cyber-purple mb-6 flex items-center gap-3">
+                            <span class="w-2 h-2 bg-cyber-purple rounded-full pulse-dot"></span>
+                            跑步 PB 记录
+                        </h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2 tracking-wider">5K PB (分钟)</label>
+                                <input type="number" id="pb5k" step="0.1" min="10" max="60" placeholder="25"
+                                    class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple font-orbitron focus:outline-none focus:border-cyber-purple transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2 tracking-wider">10K PB (分钟)</label>
+                                <input type="number" id="pb10k" step="0.1" min="20" max="120" placeholder="55"
+                                    class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple font-orbitron focus:outline-none focus:border-cyber-purple transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2 tracking-wider">半马 PB (分钟)</label>
+                                <input type="number" id="pbHalf" step="0.1" min="60" max="240" placeholder="120"
+                                    class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple font-orbitron focus:outline-none focus:border-cyber-purple transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2 tracking-wider">全马 PB (分钟)</label>
+                                <input type="number" id="pbFull" step="0.1" min="120" max="480" placeholder="240"
+                                    class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple font-orbitron focus:outline-none focus:border-cyber-purple transition-colors">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="heartRateTab" class="tab-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card">
+                        <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
+                            <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
+                            心率设置
+                        </h2>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2 tracking-wider">最大心率 (BPM)</label>
+                                <div class="flex items-center gap-4">
+                                    <input type="range" id="maxHrSlider" min="140" max="220" value="200" 
+                                        class="flex-1">
+                                    <span id="maxHrDisplay" class="font-orbitron text-2xl text-cyber-red w-20 text-right">200</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">公式: 220 - 年龄 = <span id="calculatedMaxHr">200</span> BPM</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2 tracking-wider">静息心率 (BPM)</label>
+                                <input type="number" id="restingHr" value="60" min="40" max="100" 
+                                    class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-green font-orbitron focus:outline-none focus:border-cyber-cyan transition-colors">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="font-orbitron text-xl text-cyber-green mb-6 flex items-center gap-3">
+                            <span class="w-2 h-2 bg-cyber-green rounded-full pulse-dot"></span>
+                            心率区间计算
+                        </h2>
+                        <div class="space-y-4" id="hrZones">
+                        </div>
+                        <div class="mt-6 p-4 bg-cyber-dark/50 rounded-lg border border-cyber-green/20">
+                            <p class="text-sm text-gray-400">
+                                <span class="text-cyber-green">心率储备 (HRR):</span> 
+                                <span id="hrrValue" class="font-orbitron text-cyber-green ml-2">140</span> BPM
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">Karvonen公式: (最大心率 - 静息心率) × 强度% + 静息心率</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="trainingTab" class="tab-content hidden">
+                <div class="card p-6 mb-8">
+                    <h2 class="font-orbitron text-xl text-cyber-purple mb-6 flex items-center gap-3">
+                        <span class="w-2 h-2 bg-cyber-purple rounded-full pulse-dot"></span>
+                        添加训练记录
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2 tracking-wider">日期</label>
+                            <input type="date" id="trainingDate" 
+                                class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple focus:outline-none focus:border-cyber-purple transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2 tracking-wider">距离 (公里)</label>
+                            <input type="number" id="distance" step="0.01" min="0" placeholder="0.00"
+                                class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple focus:outline-none focus:border-cyber-purple transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2 tracking-wider">时间 (分钟)</label>
+                            <input type="number" id="duration" step="0.1" min="0" placeholder="0.0"
+                                class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple focus:outline-none focus:border-cyber-purple transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2 tracking-wider">平均心率 (BPM)</label>
+                            <input type="number" id="avgHeartRate" min="60" max="220" placeholder="0"
+                                class="w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple focus:outline-none focus:border-cyber-purple transition-colors">
+                        </div>
+                    </div>
+                    <div class="mt-6 flex flex-wrap gap-4">
+                        <button onclick="addTrainingRecord()" 
+                            class="px-8 py-3 bg-gradient-to-r from-cyber-purple to-cyber-cyan rounded-lg font-orbitron tracking-wider hover:opacity-90 transition-opacity glow-purple">
+                            + 添加记录
+                        </button>
+                        <button onclick="clearAllRecords()" 
+                            class="px-8 py-3 bg-cyber-dark border border-cyber-red/50 rounded-lg font-orbitron tracking-wider text-cyber-red hover:bg-cyber-red/10 transition-colors">
+                            清空数据
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
+                        <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
+                        训练历史 <span id="recordCount" class="text-sm text-gray-500 font-rajdhani ml-2">(0 条记录)</span>
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-cyber-cyan/20 text-left">
+                                    <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">日期</th>
+                                    <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">距离</th>
+                                    <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">时间</th>
+                                    <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">配速</th>
+                                    <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">平均心率</th>
+                                    <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">心率区间</th>
+                                    <th class="py-3 px-4 text-sm text-gray-400 tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trainingTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="emptyState" class="text-center py-12 text-gray-500">
+                        <p class="font-orbitron text-lg mb-2">暂无训练数据</p>
+                        <p class="text-sm">开始记录你的第一次训练吧</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="analyticsTab" class="tab-content hidden">
+                <div class="card p-6 mb-8">
+                    <h2 class="font-orbitron text-xl text-cyber-red mb-6 flex items-center gap-3">
+                        <span class="w-2 h-2 bg-cyber-red rounded-full pulse-dot"></span>
+                        实时配速计算器
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2 tracking-wider">目标配速 (分钟/公里)</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="targetMin" min="0" max="59" value="5" placeholder="分"
+                                    class="w-full bg-cyber-dark border border-cyber-red/30 rounded-lg px-4 py-3 text-cyber-red text-center font-orbitron focus:outline-none focus:border-cyber-red">
+                                <span class="text-cyber-red text-2xl self-center">:</span>
+                                <input type="number" id="targetSec" min="0" max="59" value="0" placeholder="秒"
+                                    class="w-full bg-cyber-dark border border-cyber-red/30 rounded-lg px-4 py-3 text-cyber-red text-center font-orbitron focus:outline-none focus:border-cyber-red">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2 tracking-wider">目标距离 (公里)</label>
+                            <input type="number" id="targetDistance" step="0.1" min="0" value="42.195" 
+                                class="w-full bg-cyber-dark border border-cyber-red/30 rounded-lg px-4 py-3 text-cyber-red font-orbitron focus:outline-none focus:border-cyber-red">
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <p class="text-sm text-gray-400 mb-2 tracking-wider">预计完赛时间</p>
+                            <p id="estimatedTime" class="font-orbitron text-3xl text-cyber-yellow neon-text">--:--:--</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div class="card">
+                        <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
+                            <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
+                            训练里程趋势
+                        </h2>
+                        <div class="h-64">
+                            <canvas id="distanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="font-orbitron text-xl text-cyber-green mb-6 flex items-center gap-3">
+                            <span class="w-2 h-2 bg-cyber-green rounded-full pulse-dot"></span>
+                            心率分布统计
+                        </h2>
+                        <div class="h-64">
+                            <canvas id="heartRateChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card">
+                        <h2 class="font-orbitron text-xl text-cyber-purple mb-6 flex items-center gap-3">
+                            <span class="w-2 h-2 bg-cyber-purple rounded-full pulse-dot"></span>
+                            配速分析
+                        </h2>
+                        <div class="h-64">
+                            <canvas id="paceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="font-orbitron text-xl text-cyber-red mb-6 flex items-center gap-3">
+                            <span class="w-2 h-2 bg-cyber-red rounded-full pulse-dot"></span>
+                            心率区间分布
+                        </h2>
+                        <div class="h-64">
+                            <canvas id="zoneChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="aiTab" class="tab-content hidden">
+                <div class="card">
+                    <h2 class="font-orbitron text-xl text-cyber-green mb-6 flex items-center gap-3">
+                        <span class="w-2 h-2 bg-cyber-green rounded-full pulse-dot"></span>
+                        AI 训练助手
+                        <span class="text-xs text-gray-500 font-rajdhani ml-auto">MARATHON // AI</span>
+                    </h2>
+                    
+                    <div class="bg-cyber-dark rounded-xl overflow-hidden border border-cyber-green/20">
+                        <div id="chatMessages" class="h-80 overflow-y-auto p-4 space-y-4 scrollbar-thin">
+                            <div class="flex gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-green to-cyber-cyan flex items-center justify-center flex-shrink-0">
+                                    <span class="font-orbitron text-lg">AI</span>
+                                </div>
+                                <div class="bg-cyber-gray rounded-lg px-4 py-3 max-w-[80%]">
+                                    <p class="text-gray-200 text-sm">
+                                        👋 你好！我是你的马拉松训练助手。告诉我你的训练目标，我来为你制定专属训练方案！
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">可以问："帮我制定一个月的训练计划" 或 "如何提高配速"</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 border-t border-cyber-green/20">
+                            <div class="flex gap-3">
+                                <input type="text" id="chatInput" placeholder="输入你的问题..."
+                                    class="flex-1 bg-cyber-gray border border-cyber-green/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyber-green transition-colors">
+                                <button onclick="sendMessage()" 
+                                    class="px-6 py-3 bg-gradient-to-r from-cyber-green to-cyber-cyan rounded-lg font-orbitron tracking-wider hover:opacity-90 transition-opacity">
+                                    发送
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button onclick="quickQuestion('weekly')" 
+                            class="px-4 py-2 bg-cyber-gray border border-cyber-cyan/30 rounded-lg text-sm text-gray-300 hover:border-cyber-cyan hover:bg-cyber-cyan/10 transition-colors">
+                            📅 周训练计划
+                        </button>
+                        <button onclick="quickQuestion('pace')" 
+                            class="px-4 py-2 bg-cyber-gray border border-cyber-cyan/30 rounded-lg text-sm text-gray-300 hover:border-cyber-cyan hover:bg-cyber-cyan/10 transition-colors">
+                            ⚡ 提高配速
+                        </button>
+                        <button onclick="quickQuestion('longrun')" 
+                            class="px-4 py-2 bg-cyber-gray border border-cyber-cyan/30 rounded-lg text-sm text-gray-300 hover:border-cyber-cyan hover:bg-cyber-cyan/10 transition-colors">
+                            🏃 长距离训练
+                        </button>
+                        <button onclick="quickQuestion('recovery')" 
+                            class="px-4 py-2 bg-cyber-gray border border-cyber-cyan/30 rounded-lg text-sm text-gray-300 hover:border-cyber-cyan hover:bg-cyber-cyan/10 transition-colors">
+                            🧘 恢复建议
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center py-6 border-t border-cyber-cyan/10 bg-cyber-dark/50">
+            <p class="text-gray-500 text-sm tracking-wider">MARATHON // TRAINER v2.0 | 本地数据存储</p>
+        </footer>
+
+        <div id="apiKeyModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden items-center justify-center">
+            <div class="card p-8 max-w-md w-full mx-4">
+                <h2 class="font-orbitron text-2xl text-cyber-cyan mb-6 text-center">API 设置</h2>
+                <p class="text-gray-400 text-sm mb-6">
+                    请输入你的 DeepSeek API Key，用于启用 AI 训练助手功能。
+                    <br><span class="text-cyber-red">⚠️ 注意：这将保存在浏览器本地，请勿在公共设备上使用。</span>
+                </p>
+                <div class="mb-6">
+                    <label class="block text-sm text-gray-400 mb-2">DeepSeek API Key</label>
+                    <input type="password" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxx"
+                        class="w-full bg-cyber-dark border border-cyber-cyan/30 rounded-lg px-4 py-3 text-cyber-cyan font-mono focus:outline-none focus:border-cyber-cyan transition-colors">
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveApiKey()" class="flex-1 px-6 py-3 bg-gradient-to-r from-cyber-green to-cyber-cyan rounded-lg font-orbitron tracking-wider hover:opacity-90 transition-opacity">
+                        保存
+                    </button>
+                    <button onclick="hideApiKeyModal()" class="px-6 py-3 bg-cyber-dark border border-gray-600 text-gray-400 font-orbitron rounded hover:border-gray-500 transition-colors">
+                        取消
+                    </button>
+                </div>
+                <div class="mt-6 text-center">
+                    <a href="https://platform.deepseek.com/api_keys" target="_blank" class="text-cyber-cyan hover:underline text-sm">
+                        获取 API Key →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="installBanner" class="fixed bottom-0 left-0 right-0 bg-cyber-dark/95 backdrop-blur-md border-t border-cyber-cyan/20 p-4 z-40 hidden">
+            <div class="max-w-lg mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📱</span>
+                    <div>
+                        <p class="font-orbitron text-cyber-cyan text-sm">安装到主屏幕</p>
+                        <p class="text-xs text-gray-400">离线也能使用</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="installApp()" class="px-4 py-2 bg-cyber-cyan text-cyber-dark font-orbitron text-sm rounded hover:opacity-80">安装</button>
+                    <button onclick="hideInstallBanner()" class="px-4 py-2 bg-cyber-gray border border-gray-600 text-gray-400 font-orbitron text-sm rounded hover:border-gray-500">稍后</button>
+                </div>
+            </div>
+        </div>
+
+    <script>
+        const hrZoneColors = {
+            1: { bg: 'bg-emerald-500/20', border: 'border-emerald-500', text: 'text-emerald-400', bar: 'bg-emerald-500', name: '恢复区' },
+            2: { bg: 'bg-cyan-500/20', border: 'border-cyan-500', text: 'text-cyan-400', bar: 'bg-cyan-500', name: '脂肪燃烧区' },
+            3: { bg: 'bg-green-500/20', border: 'border-green-500', text: 'text-green-400', bar: 'bg-green-500', name: '有氧耐力区' },
+            4: { bg: 'bg-yellow-500/20', border: 'border-yellow-500', text: 'text-yellow-400', bar: 'bg-yellow-500', name: '乳酸阈值区' },
+            5: { bg: 'bg-red-500/20', border: 'border-red-500', text: 'text-red-400', bar: 'bg-red-500', name: '极限强度区' }
+        };
+
+        let trainingRecords = JSON.parse(localStorage.getItem('marathonTraining') || '[]');
+        let deferredPrompt;
+        let charts = {};
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme) {
+                document.documentElement.classList.remove('dark-mode', 'light-mode');
+                document.documentElement.classList.add(savedTheme);
+            } else if (!prefersDark) {
+                document.documentElement.classList.add('light-mode');
+            }
+            
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (!localStorage.getItem('theme')) {
+                    document.documentElement.classList.remove('dark-mode', 'light-mode');
+                    if (e.matches) {
+                        document.documentElement.classList.add('dark-mode');
+                    } else {
+                        document.documentElement.classList.add('light-mode');
+                    }
+                }
+            });
+        }
+
+        function toggleTheme() {
+            const isDark = !document.documentElement.classList.contains('light-mode');
+            
+            document.documentElement.classList.remove('dark-mode', 'light-mode');
+            
+            if (isDark) {
+                document.documentElement.classList.add('light-mode');
+                localStorage.setItem('theme', 'light-mode');
+            } else {
+                document.documentElement.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+            }
+        }
+
+        function init() {
+            initTheme();
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('trainingDate').value = today;
+            
+            updateMaxHr();
+            updateHrZones();
+            renderTrainingTable();
+            calculateEstimatedTime();
+            initPersonalInfo();
+            calculateBMI();
+
+            document.getElementById('age').addEventListener('input', () => { updateMaxHr(); savePersonalInfo(); });
+            document.getElementById('maxHrSlider').addEventListener('input', updateMaxHrFromSlider);
+            document.getElementById('restingHr').addEventListener('input', updateHrZones);
+            document.getElementById('targetMin').addEventListener('input', calculateEstimatedTime);
+            document.getElementById('targetSec').addEventListener('input', calculateEstimatedTime);
+            document.getElementById('targetDistance').addEventListener('input', calculateEstimatedTime);
+            document.getElementById('height').addEventListener('input', () => { calculateBMI(); savePersonalInfo(); });
+            document.getElementById('weight').addEventListener('input', () => { calculateBMI(); savePersonalInfo(); });
+            document.getElementById('pb5k').addEventListener('input', savePersonalInfo);
+            document.getElementById('pb10k').addEventListener('input', savePersonalInfo);
+            document.getElementById('pbHalf').addEventListener('input', savePersonalInfo);
+            document.getElementById('pbFull').addEventListener('input', savePersonalInfo);
+            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => {
+                        console.log('✅ Service Worker 已注册');
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showUpdateBanner();
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => console.log('❌ SW 注册失败:', err));
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                setTimeout(() => showInstallBanner(), 3000);
+            });
+
+            window.addEventListener('online', () => {
+                showOnlineStatus(true);
+            });
+            
+            window.addEventListener('offline', () => {
+                showOnlineStatus(false);
+            });
+
+            initCharts();
+        }
+
+        function showOnlineStatus(isOnline) {
+            const statusEl = document.getElementById('onlineStatus');
+            const statusText = document.getElementById('statusText');
+            if (statusEl) {
+                const indicator = statusEl.querySelector('.pulse-indicator');
+                if (indicator) {
+                    indicator.style.backgroundColor = isOnline ? '#22c55e' : '#ef4444';
+                }
+            }
+            if (statusText) {
+                statusText.textContent = isOnline ? '在线' : '离线';
+            }
+        }
+
+        function showUpdateBanner() {
+            const banner = document.createElement('div');
+            banner.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-cyan-500 to-green-500 text-gray-900 px-6 py-3 rounded-full font-bold shadow-lg z-50 animate-pulse';
+            banner.innerHTML = '📱 有更新！点击刷新';
+            banner.onclick = () => {
+                window.location.reload();
+            };
+            document.body.appendChild(banner);
+            setTimeout(() => banner.remove(), 10000);
+        }
+
+        function showTab(tabId, event) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active', 'text-cyber-cyan'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.add('text-gray-400'));
+            if (event && event.target) {
+                event.target.classList.add('active', 'text-cyber-cyan');
+                event.target.classList.remove('text-gray-400');
+            }
+            
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(tabId + 'Tab').classList.remove('hidden');
+            
+            if (tabId === 'analytics') {
+                setTimeout(updateCharts, 100);
+            }
+        }
+
+        function updateMaxHr() {
+            const age = parseInt(document.getElementById('age').value) || 20;
+            const calculatedMaxHr = 220 - age;
+            document.getElementById('calculatedMaxHr').textContent = calculatedMaxHr;
+            
+            const slider = document.getElementById('maxHrSlider');
+            const display = document.getElementById('maxHrDisplay');
+            
+            if (parseInt(slider.value) === parseInt(display.textContent)) {
+                slider.value = calculatedMaxHr;
+                display.textContent = calculatedMaxHr;
+            }
+            updateHrZones();
+        }
+
+        function updateMaxHrFromSlider() {
+            const slider = document.getElementById('maxHrSlider');
+            const display = document.getElementById('maxHrDisplay');
+            display.textContent = slider.value;
+            updateHrZones();
+        }
+
+        function updateHrZones() {
+            const maxHr = parseInt(document.getElementById('maxHrDisplay').textContent) || 200;
+            const restingHr = parseInt(document.getElementById('restingHr').value) || 60;
+            const hrr = maxHr - restingHr;
+            
+            document.getElementById('hrrValue').textContent = hrr;
+            
+            const zonesDiv = document.getElementById('hrZones');
+            zonesDiv.innerHTML = '';
+            
+            const zones = [
+                { zone: 1, min: 0.5, max: 0.6, label: 'Zone 1' },
+                { zone: 2, min: 0.6, max: 0.7, label: 'Zone 2' },
+                { zone: 3, min: 0.7, max: 0.8, label: 'Zone 3' },
+                { zone: 4, min: 0.8, max: 0.9, label: 'Zone 4' },
+                { zone: 5, min: 0.9, max: 1.0, label: 'Zone 5' }
+            ];
+            
+            zones.forEach(z => {
+                const minBpm = Math.round(restingHr + hrr * z.min);
+                const maxBpm = Math.round(restingHr + hrr * z.max);
+                const colors = hrZoneColors[z.zone];
+                
+                zonesDiv.innerHTML += `
+                    <div class="${colors.bg} ${colors.border} border rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-orbitron text-sm ${colors.text}">${z.label}</span>
+                            <span class="${colors.text} text-sm">${colors.name}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex-1 h-2 bg-cyber-dark rounded-full overflow-hidden">
+                                <div class="${colors.bar} h-full zone-bar" style="width: ${(z.max - z.min) * 100}%"></div>
+                            </div>
+                            <span class="font-orbitron text-sm ${colors.text}">${minBpm}-${maxBpm} BPM</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function calculateBMI() {
+            const height = parseInt(document.getElementById('height').value) || 0;
+            const weight = parseInt(document.getElementById('weight').value) || 0;
+            
+            if (height > 0 && weight > 0) {
+                const bmi = weight / Math.pow(height / 100, 2);
+                const bmiDisplay = document.getElementById('bmiDisplay');
+                bmiDisplay.textContent = bmi.toFixed(1);
+                
+                if (bmi < 18.5) {
+                    bmiDisplay.className = 'w-full bg-cyber-dark border border-cyber-purple/30 rounded-lg px-4 py-3 text-cyber-purple font-orbitron';
+                } else if (bmi < 24) {
+                    bmiDisplay.className = 'w-full bg-cyber-dark border border-cyber-green/30 rounded-lg px-4 py-3 text-cyber-green font-orbitron';
+                } else if (bmi < 28) {
+                    bmiDisplay.className = 'w-full bg-cyber-dark border border-cyber-yellow/30 rounded-lg px-4 py-3 text-cyber-yellow font-orbitron';
+                } else {
+                    bmiDisplay.className = 'w-full bg-cyber-dark border border-cyber-red/30 rounded-lg px-4 py-3 text-cyber-red font-orbitron';
+                }
+            }
+        }
+
+        function initPersonalInfo() {
+            const saved = JSON.parse(localStorage.getItem('marathonPersonalInfo') || '{}');
+            if (saved.age) document.getElementById('age').value = saved.age;
+            if (saved.height) document.getElementById('height').value = saved.height;
+            if (saved.weight) document.getElementById('weight').value = saved.weight;
+            if (saved.pb5k) document.getElementById('pb5k').value = saved.pb5k;
+            if (saved.pb10k) document.getElementById('pb10k').value = saved.pb10k;
+            if (saved.pbHalf) document.getElementById('pbHalf').value = saved.pbHalf;
+            if (saved.pbFull) document.getElementById('pbFull').value = saved.pbFull;
+        }
+
+        function savePersonalInfo() {
+            const info = {
+                age: document.getElementById('age').value,
+                height: document.getElementById('height').value,
+                weight: document.getElementById('weight').value,
+                pb5k: document.getElementById('pb5k').value,
+                pb10k: document.getElementById('pb10k').value,
+                pbHalf: document.getElementById('pbHalf').value,
+                pbFull: document.getElementById('pbFull').value
+            };
+            localStorage.setItem('marathonPersonalInfo', JSON.stringify(info));
+        }
+
+        function addTrainingRecord() {
+            const date = document.getElementById('trainingDate').value;
+            const distance = parseFloat(document.getElementById('distance').value) || 0;
+            const duration = parseFloat(document.getElementById('duration').value) || 0;
+            const avgHeartRate = parseInt(document.getElementById('avgHeartRate').value) || 0;
+            
+            if (!date || distance <= 0 || duration <= 0) {
+                alert('请填写完整的训练数据');
+                return;
+            }
+            
+            const pace = duration / distance;
+            const hours = Math.floor(pace / 60);
+            const minutes = Math.floor(pace % 60);
+            const seconds = Math.round((pace % 1) * 60);
+            const paceStr = hours > 0 ? `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` : `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            const maxHr = parseInt(document.getElementById('maxHrDisplay').textContent) || 200;
+            const restingHr = parseInt(document.getElementById('restingHr').value) || 60;
+            const hrr = maxHr - restingHr;
+            const intensity = (avgHeartRate - restingHr) / hrr;
+            
+            let zone = 1;
+            if (intensity >= 0.9) zone = 5;
+            else if (intensity >= 0.8) zone = 4;
+            else if (intensity >= 0.7) zone = 3;
+            else if (intensity >= 0.6) zone = 2;
+            
+            const record = {
+                id: Date.now(),
+                date,
+                distance: distance.toFixed(2),
+                duration: duration.toFixed(1),
+                avgHeartRate,
+                pace: paceStr,
+                zone
+            };
+            
+            trainingRecords.push(record);
+            localStorage.setItem('marathonTraining', JSON.stringify(trainingRecords));
+            renderTrainingTable();
+            updateCharts();
+            
+            document.getElementById('distance').value = '';
+            document.getElementById('duration').value = '';
+            document.getElementById('avgHeartRate').value = '';
+        }
+
+        function renderTrainingTable() {
+            const tbody = document.getElementById('trainingTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const recordCount = document.getElementById('recordCount');
+            
+            recordCount.textContent = `(${trainingRecords.length} 条记录)`;
+            
+            if (trainingRecords.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            
+            trainingRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            tbody.innerHTML = trainingRecords.map(record => {
+                const colors = hrZoneColors[record.zone];
+                return `
+                    <tr class="border-b border-cyber-cyan/10 hover:bg-cyber-gray/30 transition-colors">
+                        <td class="py-3 px-4">${record.date}</td>
+                        <td class="py-3 px-4 font-orbitron text-cyber-cyan">${record.distance} km</td>
+                        <td class="py-3 px-4 font-orbitron text-cyber-green">${record.duration} min</td>
+                        <td class="py-3 px-4 font-orbitron text-cyber-purple">${record.pace}/km</td>
+                        <td class="py-3 px-4 font-orbitron text-cyber-red">${record.avgHeartRate} BPM</td>
+                        <td class="py-3 px-4"><span class="px-2 py-1 rounded ${colors.bg} ${colors.border} border ${colors.text} text-xs">${colors.name}</span></td>
+                        <td class="py-3 px-4">
+                            <button onclick="deleteRecord(${record.id})" class="text-red-400 hover:text-red-300 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function deleteRecord(id) {
+            trainingRecords = trainingRecords.filter(r => r.id !== id);
+            localStorage.setItem('marathonTraining', JSON.stringify(trainingRecords));
+            renderTrainingTable();
+            updateCharts();
+        }
+
+        function clearAllRecords() {
+            if (confirm('确定要清空所有训练记录吗？')) {
+                trainingRecords = [];
+                localStorage.setItem('marathonTraining', JSON.stringify(trainingRecords));
+                renderTrainingTable();
+                updateCharts();
+            }
+        }
+
+        function calculateEstimatedTime() {
+            const min = parseInt(document.getElementById('targetMin').value) || 0;
+            const sec = parseInt(document.getElementById('targetSec').value) || 0;
+            const distance = parseFloat(document.getElementById('targetDistance').value) || 0;
+            
+            const paceSeconds = (min * 60) + sec;
+            const totalSeconds = paceSeconds * distance;
+            
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = Math.round(totalSeconds % 60);
+            
+            if (distance > 0) {
+                document.getElementById('estimatedTime').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                document.getElementById('estimatedTime').textContent = '--:--:--';
+            }
+        }
+
+        function initCharts() {
+            const ctx1 = document.getElementById('distanceChart').getContext('2d');
+            const ctx2 = document.getElementById('heartRateChart').getContext('2d');
+            const ctx3 = document.getElementById('paceChart').getContext('2d');
+            const ctx4 = document.getElementById('zoneChart').getContext('2d');
+            
+            const gradient1 = ctx1.createLinearGradient(0, 0, 0, 250);
+            gradient1.addColorStop(0, 'rgba(0, 240, 255, 0.4)');
+            gradient1.addColorStop(0.5, 'rgba(0, 240, 255, 0.2)');
+            gradient1.addColorStop(1, 'rgba(0, 240, 255, 0)');
+            
+            const gradient2 = ctx3.createLinearGradient(0, 0, 0, 250);
+            gradient2.addColorStop(0, 'rgba(184, 41, 255, 0.4)');
+            gradient2.addColorStop(0.5, 'rgba(184, 41, 255, 0.2)');
+            gradient2.addColorStop(1, 'rgba(184, 41, 255, 0)');
+            
+            charts.distance = new Chart(ctx1, {
+                type: 'line',
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: '距离 (km)', 
+                        data: [], 
+                        borderColor: '#00f0ff', 
+                        backgroundColor: gradient1, 
+                        tension: 0.4, 
+                        fill: true,
+                        pointBackgroundColor: '#00f0ff',
+                        pointBorderColor: '#0a0a0a',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#ffffff',
+                        pointHoverBorderColor: '#00f0ff',
+                        pointHoverBorderWidth: 3
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 10, 0.9)',
+                            titleColor: '#00f0ff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(0, 240, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `距离: ${context.parsed.y} km`;
+                                }
+                            }
+                        }
+                    }, 
+                    scales: { 
+                        x: { 
+                            grid: { color: 'rgba(0, 240, 255, 0.1)', drawBorder: false }, 
+                            ticks: { color: '#6b7280', font: { size: 11 } } 
+                        }, 
+                        y: { 
+                            grid: { color: 'rgba(0, 240, 255, 0.1)', drawBorder: false }, 
+                            ticks: { color: '#6b7280', font: { size: 11 } },
+                            beginAtZero: true
+                        } 
+                    },
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    }
+                }
+            });
+            
+            charts.heartRate = new Chart(ctx2, {
+                type: 'bar',
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: '心率 (BPM)', 
+                        data: [], 
+                        backgroundColor: '#00ff88', 
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1200,
+                        easing: 'easeOutElastic',
+                        from: {
+                            opacity: 0,
+                            y: 100
+                        }
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 10, 0.9)',
+                            titleColor: '#00ff88',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(0, 255, 136, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `心率: ${context.parsed.y} BPM`;
+                                }
+                            }
+                        }
+                    }, 
+                    scales: { 
+                        x: { grid: { display: false }, ticks: { color: '#6b7280', font: { size: 11 } } }, 
+                        y: { grid: { color: 'rgba(0, 255, 136, 0.1)', drawBorder: false }, ticks: { color: '#6b7280', font: { size: 11 } }, beginAtZero: true } 
+                    },
+                    hover: {
+                        animationDuration: 300
+                    }
+                }
+            });
+            
+            charts.pace = new Chart(ctx3, {
+                type: 'line',
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: '配速 (min/km)', 
+                        data: [], 
+                        borderColor: '#b829ff', 
+                        backgroundColor: gradient2, 
+                        tension: 0.4, 
+                        fill: true,
+                        pointBackgroundColor: '#b829ff',
+                        pointBorderColor: '#0a0a0a',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#ffffff',
+                        pointHoverBorderColor: '#b829ff',
+                        pointHoverBorderWidth: 3
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 10, 0.9)',
+                            titleColor: '#b829ff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(184, 41, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const pace = context.parsed.y;
+                                    const min = Math.floor(pace);
+                                    const sec = Math.round((pace - min) * 60);
+                                    return `配速: ${min}:${sec.toString().padStart(2, '0')} min/km`;
+                                }
+                            }
+                        }
+                    }, 
+                    scales: { 
+                        x: { grid: { color: 'rgba(184, 41, 255, 0.1)', drawBorder: false }, ticks: { color: '#6b7280', font: { size: 11 } } }, 
+                        y: { grid: { color: 'rgba(184, 41, 255, 0.1)', drawBorder: false }, ticks: { color: '#6b7280', font: { size: 11 } }, reverse: true, beginAtZero: true } 
+                    },
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    }
+                }
+            });
+            
+            charts.zone = new Chart(ctx4, {
+                type: 'doughnut',
+                data: { 
+                    labels: ['恢复区', '脂肪燃烧区', '有氧耐力区', '乳酸阈值区', '极限强度区'], 
+                    datasets: [{ 
+                        data: [0, 0, 0, 0, 0], 
+                        backgroundColor: ['#10b981', '#06b6d4', '#22c55e', '#eab308', '#ef4444'],
+                        borderColor: '#0a0a0a',
+                        borderWidth: 3,
+                        hoverOffset: 15
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '60%',
+                    rotation: -90,
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: { 
+                        legend: { 
+                            position: 'right', 
+                            labels: { 
+                                color: '#9ca3af', 
+                                padding: 15,
+                                font: { size: 11 },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            } 
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 10, 0.9)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${value} 次 (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            updateCharts();
+        }
+
+        function updateCharts() {
+            if (!charts.distance) return;
+            
+            const sortedRecords = [...trainingRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const labels = sortedRecords.map(r => r.date.slice(5));
+            
+            charts.distance.data.labels = labels;
+            charts.distance.data.datasets[0].data = sortedRecords.map(r => parseFloat(r.distance));
+            charts.distance.update();
+            
+            charts.heartRate.data.labels = labels;
+            charts.heartRate.data.datasets[0].data = sortedRecords.map(r => r.avgHeartRate);
+            charts.heartRate.update();
+            
+            charts.pace.data.labels = labels;
+            charts.pace.data.datasets[0].data = sortedRecords.map(r => {
+                const [min, sec] = r.pace.split(':');
+                return parseInt(min) + (parseInt(sec || 0) / 60);
+            });
+            charts.pace.update();
+            
+            const zoneCounts = [0, 0, 0, 0, 0];
+            trainingRecords.forEach(r => { zoneCounts[r.zone - 1]++; });
+            charts.zone.data.datasets[0].data = zoneCounts;
+            charts.zone.update();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const apiKey = localStorage.getItem('deepseek_api_key');
+            if (!apiKey) {
+                alert('请先设置 DeepSeek API Key 才能使用 AI 助手功能');
+                showApiKeyModal();
+                return;
+            }
+            
+            const chatMessages = document.getElementById('chatMessages');
+            
+            chatMessages.innerHTML += `
+                <div class="flex gap-3 justify-end">
+                    <div class="bg-cyber-purple/20 border border-cyber-purple/30 rounded-lg px-4 py-3 max-w-[80%]">
+                        <p class="text-gray-200 text-sm">${message}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-purple to-cyber-red flex items-center justify-center flex-shrink-0">
+                        <span class="font-orbitron text-sm">U</span>
+                    </div>
+                </div>
+            `;
+            
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            const loadingMsgId = 'loading-' + Date.now();
+            chatMessages.innerHTML += `
+                <div class="flex gap-3" id="${loadingMsgId}">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-green to-cyber-cyan flex items-center justify-center flex-shrink-0">
+                        <span class="font-orbitron text-lg pulse-dot">AI</span>
+                    </div>
+                    <div class="bg-cyber-gray rounded-lg px-4 py-3 max-w-[80%]">
+                        <p class="text-gray-200 text-sm">
+                            <span class="inline-block animate-pulse">正在连接 DeepSeek...</span>
+                        </p>
+                    </div>
+                </div>
+            `;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            callDeepSeekAPI(message, apiKey, loadingMsgId)
+                .then(response => {
+                    const loadingEl = document.getElementById(loadingMsgId);
+                    if (loadingEl) {
+                        loadingEl.innerHTML = `
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-green to-cyber-cyan flex items-center justify-center flex-shrink-0">
+                                <span class="font-orbitron text-lg">AI</span>
+                            </div>
+                            <div class="bg-cyber-gray rounded-lg px-4 py-3 max-w-[80%]">
+                                <p class="text-gray-200 text-sm whitespace-pre-wrap">${response}</p>
+                            </div>
+                        `;
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                })
+                .catch(error => {
+                    const loadingEl = document.getElementById(loadingMsgId);
+                    if (loadingEl) {
+                        loadingEl.innerHTML = `
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-red to-cyber-orange flex items-center justify-center flex-shrink-0">
+                                <span class="font-orbitron text-lg">!</span>
+                            </div>
+                            <div class="bg-cyber-red/20 border border-cyber-red/30 rounded-lg px-4 py-3 max-w-[80%]">
+                                <p class="text-gray-200 text-sm">❌ 请求失败: ${error.message}</p>
+                                <button onclick="showApiKeyModal()" class="mt-2 text-cyber-cyan hover:underline text-xs">检查 API Key 设置</button>
+                            </div>
+                        `;
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                });
+        }
+
+        async function callDeepSeekAPI(message, apiKey, loadingMsgId) {
+            const systemPrompt = `你是马拉松训练专家 AI 助手，专门帮助用户进行科学的马拉松训练。请根据用户的问题提供专业、实用的建议。
+
+你的专长包括：
+- 训练计划制定（周训练计划、周期化训练）
+- 配速和速度训练技巧
+- 长距离跑训练（LSD）
+- 恢复和休息建议
+- 心率区间训练
+- 营养和补给策略
+- 伤病预防
+- 比赛策略
+
+请用中文回答，回答要专业但易懂，可以适当使用 emoji 增强可读性。如果涉及具体数据（如配速、心率等），请根据用户的个人信息（如年龄、体重、目标等）给出个性化建议。`;
+
+            try {
+                const response = await fetch('https://api.deepseek.com/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: message }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 2000,
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error?.message || `API 请求失败 (${response.status})`);
+                }
+
+                const data = await response.json();
+                
+                if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+                    return data.choices[0].message.content;
+                } else {
+                    throw new Error('API 返回数据格式异常');
+                }
+            } catch (error) {
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    throw new Error('网络连接失败，请检查网络或 CORS 设置');
+                }
+                throw error;
+            }
+        }
+
+        function quickQuestion(type) {
+            document.getElementById('chatInput').value = {
+                weekly: '帮我制定周训练计划',
+                pace: '如何提高配速',
+                longrun: '长距离训练建议',
+                recovery: '恢复建议'
+            }[type];
+            sendMessage();
+        }
+
+        function showApiKeyModal() {
+            const modal = document.getElementById('apiKeyModal');
+            const input = document.getElementById('apiKeyInput');
+            const savedKey = localStorage.getItem('deepseek_api_key');
+            if (savedKey) {
+                input.value = savedKey;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function hideApiKeyModal() {
+            document.getElementById('apiKeyModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value;
+            if (key) {
+                localStorage.setItem('deepseek_api_key', key);
+                alert('API Key 已保存');
+                hideApiKeyModal();
+            }
+        }
+
+        function showInstallBanner() {
+            if (!localStorage.getItem('hideInstallBanner')) {
+                document.getElementById('installBanner').classList.remove('hidden');
+            }
+        }
+
+        function hideInstallBanner() {
+            document.getElementById('installBanner').classList.add('hidden');
+            localStorage.setItem('hideInstallBanner', 'true');
+        }
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(choiceResult => {
+                    if (choiceResult.outcome === 'accepted') {
+                        hideInstallBanner();
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
