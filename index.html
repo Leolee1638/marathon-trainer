@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -1234,9 +1234,15 @@
             const ctx3 = document.getElementById('paceChart').getContext('2d');
             const ctx4 = document.getElementById('zoneChart').getContext('2d');
             
-            const gradient = ctx1.createLinearGradient(0, 0, 0, 250);
-            gradient.addColorStop(0, 'rgba(0, 240, 255, 0.3)');
-            gradient.addColorStop(1, 'rgba(0, 240, 255, 0)');
+            const gradient1 = ctx1.createLinearGradient(0, 0, 0, 250);
+            gradient1.addColorStop(0, 'rgba(0, 240, 255, 0.4)');
+            gradient1.addColorStop(0.5, 'rgba(0, 240, 255, 0.2)');
+            gradient1.addColorStop(1, 'rgba(0, 240, 255, 0)');
+            
+            const gradient2 = ctx3.createLinearGradient(0, 0, 0, 250);
+            gradient2.addColorStop(0, 'rgba(184, 41, 255, 0.4)');
+            gradient2.addColorStop(0.5, 'rgba(184, 41, 255, 0.2)');
+            gradient2.addColorStop(1, 'rgba(184, 41, 255, 0)');
             
             charts.distance = new Chart(ctx1, {
                 type: 'line',
@@ -1246,27 +1252,64 @@
                         label: '距离 (km)', 
                         data: [], 
                         borderColor: '#00f0ff', 
-                        backgroundColor: gradient, 
+                        backgroundColor: gradient1, 
                         tension: 0.4, 
-                        fill: true 
+                        fill: true,
+                        pointBackgroundColor: '#00f0ff',
+                        pointBorderColor: '#0a0a0a',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#ffffff',
+                        pointHoverBorderColor: '#00f0ff',
+                        pointHoverBorderWidth: 3
                     }] 
                 },
                 options: { 
                     responsive: true, 
-                    maintainAspectRatio: false, 
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
                     plugins: { 
-                        legend: { display: false } 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 10, 0.9)',
+                            titleColor: '#00f0ff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(0, 240, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `距离: ${context.parsed.y} km`;
+                                }
+                            }
+                        }
                     }, 
                     scales: { 
                         x: { 
-                            grid: { color: 'rgba(0, 240, 255, 0.1)' }, 
-                            ticks: { color: '#6b7280' } 
+                            grid: { color: 'rgba(0, 240, 255, 0.1)', drawBorder: false }, 
+                            ticks: { color: '#6b7280', font: { size: 11 } } 
                         }, 
                         y: { 
-                            grid: { color: 'rgba(0, 240, 255, 0.1)' }, 
-                            ticks: { color: '#6b7280' } 
+                            grid: { color: 'rgba(0, 240, 255, 0.1)', drawBorder: false }, 
+                            ticks: { color: '#6b7280', font: { size: 11 } },
+                            beginAtZero: true
                         } 
-                    } 
+                    },
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    }
                 }
             });
             
@@ -1278,17 +1321,46 @@
                         label: '心率 (BPM)', 
                         data: [], 
                         backgroundColor: '#00ff88', 
-                        borderRadius: 6 
+                        borderRadius: 6,
+                        borderSkipped: false
                     }] 
                 },
                 options: { 
                     responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } }, 
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1200,
+                        easing: 'easeOutElastic',
+                        from: {
+                            opacity: 0,
+                            y: 100
+                        }
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 10, 0.9)',
+                            titleColor: '#00ff88',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(0, 255, 136, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `心率: ${context.parsed.y} BPM`;
+                                }
+                            }
+                        }
+                    }, 
                     scales: { 
-                        x: { grid: { display: false }, ticks: { color: '#6b7280' } }, 
-                        y: { grid: { color: 'rgba(0, 255, 136, 0.1)' }, ticks: { color: '#6b7280' } } 
-                    } 
+                        x: { grid: { display: false }, ticks: { color: '#6b7280', font: { size: 11 } } }, 
+                        y: { grid: { color: 'rgba(0, 255, 136, 0.1)', drawBorder: false }, ticks: { color: '#6b7280', font: { size: 11 } }, beginAtZero: true } 
+                    },
+                    hover: {
+                        animationDuration: 300
+                    }
                 }
             });
             
@@ -1300,19 +1372,60 @@
                         label: '配速 (min/km)', 
                         data: [], 
                         borderColor: '#b829ff', 
-                        backgroundColor: 'rgba(184, 41, 255, 0.1)', 
+                        backgroundColor: gradient2, 
                         tension: 0.4, 
-                        fill: true 
+                        fill: true,
+                        pointBackgroundColor: '#b829ff',
+                        pointBorderColor: '#0a0a0a',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#ffffff',
+                        pointHoverBorderColor: '#b829ff',
+                        pointHoverBorderWidth: 3
                     }] 
                 },
                 options: { 
                     responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } }, 
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 10, 0.9)',
+                            titleColor: '#b829ff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(184, 41, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const pace = context.parsed.y;
+                                    const min = Math.floor(pace);
+                                    const sec = Math.round((pace - min) * 60);
+                                    return `配速: ${min}:${sec.toString().padStart(2, '0')} min/km`;
+                                }
+                            }
+                        }
+                    }, 
                     scales: { 
-                        x: { grid: { color: 'rgba(184, 41, 255, 0.1)' }, ticks: { color: '#6b7280' } }, 
-                        y: { grid: { color: 'rgba(184, 41, 255, 0.1)' }, ticks: { color: '#6b7280' }, reverse: true } 
-                    } 
+                        x: { grid: { color: 'rgba(184, 41, 255, 0.1)', drawBorder: false }, ticks: { color: '#6b7280', font: { size: 11 } } }, 
+                        y: { grid: { color: 'rgba(184, 41, 255, 0.1)', drawBorder: false }, ticks: { color: '#6b7280', font: { size: 11 } }, reverse: true, beginAtZero: true } 
+                    },
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    }
                 }
             });
             
@@ -1322,17 +1435,52 @@
                     labels: ['恢复区', '脂肪燃烧区', '有氧耐力区', '乳酸阈值区', '极限强度区'], 
                     datasets: [{ 
                         data: [0, 0, 0, 0, 0], 
-                        backgroundColor: ['#10b981', '#06b6d4', '#22c55e', '#eab308', '#ef4444'], 
-                        borderWidth: 0 
+                        backgroundColor: ['#10b981', '#06b6d4', '#22c55e', '#eab308', '#ef4444'],
+                        borderColor: '#0a0a0a',
+                        borderWidth: 3,
+                        hoverOffset: 15
                     }] 
                 },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
-                    cutout: '60%', 
+                    cutout: '60%',
+                    rotation: -90,
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
                     plugins: { 
-                        legend: { position: 'right', labels: { color: '#9ca3af', padding: 15 } } 
-                    } 
+                        legend: { 
+                            position: 'right', 
+                            labels: { 
+                                color: '#9ca3af', 
+                                padding: 15,
+                                font: { size: 11 },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            } 
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 10, 0.9)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${value} 次 (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
                 }
             });
             
