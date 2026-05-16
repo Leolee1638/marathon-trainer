@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -20,6 +20,19 @@
             theme: {
                 extend: {
                     colors: {
+                        cyber: {
+                            dark: '#0a0a0a',
+                            darker: '#111111',
+                            darkest: '#000000',
+                            cyan: '#00f0ff',
+                            green: '#00ff88',
+                            red: '#ff4444',
+                            purple: '#b829ff',
+                            yellow: '#ffe600',
+                            orange: '#ff8c00',
+                            gray: '#1a1a1a',
+                            lightgray: '#333333',
+                        },
                         dark: {
                             900: '#0a0a0a',
                             800: '#111111',
@@ -278,6 +291,10 @@
         .tab-content {
             animation: slideUp 0.3s ease-out;
         }
+        
+        .hidden {
+            display: none !important;
+        }
 
         .scrollbar-custom::-webkit-scrollbar {
             width: 8px;
@@ -404,24 +421,6 @@
             background-color: rgba(239, 68, 68, 0.1);
             color: #ef4444;
         }
-
-        @media (prefers-color-scheme: light) {
-            :root:not(.dark-mode):not(.light-mode) {
-                --bg-primary: #ffffff;
-                --bg-secondary: #f5f5f5;
-                --bg-tertiary: #eeeeee;
-                --bg-card: #ffffff;
-                --border-color: #e0e0e0;
-                --border-light: #dddddd;
-                --text-primary: #000000;
-                --text-secondary: #555555;
-                --text-muted: #999999;
-                --accent-color: #000000;
-                --hover-bg: #f0f0f0;
-                --focus-ring: rgba(0, 0, 0, 0.1);
-                --shadow-color: rgba(0, 0, 0, 0.1);
-            }
-        }
     </style>
 </head>
 <body class="font-rajdhani text-primary bg-primary scrollbar-custom">
@@ -464,19 +463,19 @@
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap items-center justify-between">
                     <div class="flex flex-wrap">
-                        <button onclick="showTab('profile')" class="nav-item active font-orbitron text-sm tracking-wider">
+                        <button onclick="showTab('profile', event)" class="nav-item active font-orbitron text-sm tracking-wider">
                             👤 个人档案
                         </button>
-                        <button onclick="showTab('heartRate')" class="nav-item font-orbitron text-sm tracking-wider">
+                        <button onclick="showTab('heartRate', event)" class="nav-item font-orbitron text-sm tracking-wider">
                             ❤️ 心率分析
                         </button>
-                        <button onclick="showTab('training')" class="nav-item font-orbitron text-sm tracking-wider">
+                        <button onclick="showTab('training', event)" class="nav-item font-orbitron text-sm tracking-wider">
                             📝 训练记录
                         </button>
-                        <button onclick="showTab('analytics')" class="nav-item font-orbitron text-sm tracking-wider">
+                        <button onclick="showTab('analytics', event)" class="nav-item font-orbitron text-sm tracking-wider">
                             📊 数据分析
                         </button>
-                        <button onclick="showTab('ai')" class="nav-item font-orbitron text-sm tracking-wider">
+                        <button onclick="showTab('ai', event)" class="nav-item font-orbitron text-sm tracking-wider">
                             🤖 AI助手
                         </button>
                     </div>
@@ -983,11 +982,13 @@
             setTimeout(() => banner.remove(), 10000);
         }
 
-        function showTab(tabId) {
+        function showTab(tabId, event) {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active', 'text-cyber-cyan'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.add('text-gray-400'));
-            event.target.classList.add('active', 'text-cyber-cyan');
-            event.target.classList.remove('text-gray-400');
+            if (event && event.target) {
+                event.target.classList.add('active', 'text-cyber-cyan');
+                event.target.classList.remove('text-gray-400');
+            }
             
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.getElementById(tabId + 'Tab').classList.remove('hidden');
@@ -1239,26 +1240,100 @@
             
             charts.distance = new Chart(ctx1, {
                 type: 'line',
-                data: { labels: [], datasets: [{ label: '距离 (km)', data: [], borderColor: '#00f0ff', backgroundColor: gradient, tension: 0.4, fill: true }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(0, 240, 255, 0.1)' }, ticks: { color: '#6b7280' } }, y: { grid: { color: 'rgba(0, 240, 255, 0.1)' }, ticks: { color: '#6b7280' } } }
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: '距离 (km)', 
+                        data: [], 
+                        borderColor: '#00f0ff', 
+                        backgroundColor: gradient, 
+                        tension: 0.4, 
+                        fill: true 
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: false } 
+                    }, 
+                    scales: { 
+                        x: { 
+                            grid: { color: 'rgba(0, 240, 255, 0.1)' }, 
+                            ticks: { color: '#6b7280' } 
+                        }, 
+                        y: { 
+                            grid: { color: 'rgba(0, 240, 255, 0.1)' }, 
+                            ticks: { color: '#6b7280' } 
+                        } 
+                    } 
+                }
             });
             
             charts.heartRate = new Chart(ctx2, {
                 type: 'bar',
-                data: { labels: [], datasets: [{ label: '心率 (BPM)', data: [], backgroundColor: '#00ff88', borderRadius: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#6b7280' } }, y: { grid: { color: 'rgba(0, 255, 136, 0.1)' }, ticks: { color: '#6b7280' } } }
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: '心率 (BPM)', 
+                        data: [], 
+                        backgroundColor: '#00ff88', 
+                        borderRadius: 6 
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { 
+                        x: { grid: { display: false }, ticks: { color: '#6b7280' } }, 
+                        y: { grid: { color: 'rgba(0, 255, 136, 0.1)' }, ticks: { color: '#6b7280' } } 
+                    } 
+                }
             });
             
             charts.pace = new Chart(ctx3, {
                 type: 'line',
-                data: { labels: [], datasets: [{ label: '配速 (min/km)', data: [], borderColor: '#b829ff', backgroundColor: 'rgba(184, 41, 255, 0.1)', tension: 0.4, fill: true }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(184, 41, 255, 0.1)' }, ticks: { color: '#6b7280' } }, y: { grid: { color: 'rgba(184, 41, 255, 0.1)' }, ticks: { color: '#6b7280' }, reverse: true } }
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: '配速 (min/km)', 
+                        data: [], 
+                        borderColor: '#b829ff', 
+                        backgroundColor: 'rgba(184, 41, 255, 0.1)', 
+                        tension: 0.4, 
+                        fill: true 
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { 
+                        x: { grid: { color: 'rgba(184, 41, 255, 0.1)' }, ticks: { color: '#6b7280' } }, 
+                        y: { grid: { color: 'rgba(184, 41, 255, 0.1)' }, ticks: { color: '#6b7280' }, reverse: true } 
+                    } 
+                }
             });
             
             charts.zone = new Chart(ctx4, {
                 type: 'doughnut',
-                data: { labels: ['恢复区', '脂肪燃烧区', '有氧耐力区', '乳酸阈值区', '极限强度区'], datasets: [{ data: [0, 0, 0, 0, 0], backgroundColor: ['#10b981', '#06b6d4', '#22c55e', '#eab308', '#ef4444'], borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { color: '#9ca3af', padding: 15 } } } }
+                data: { 
+                    labels: ['恢复区', '脂肪燃烧区', '有氧耐力区', '乳酸阈值区', '极限强度区'], 
+                    datasets: [{ 
+                        data: [0, 0, 0, 0, 0], 
+                        backgroundColor: ['#10b981', '#06b6d4', '#22c55e', '#eab308', '#ef4444'], 
+                        borderWidth: 0 
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '60%', 
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: '#9ca3af', padding: 15 } } 
+                    } 
+                }
             });
             
             updateCharts();
