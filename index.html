@@ -16,21 +16,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        cyber: {
-                            dark: '#0a0a0f',
-                            darker: '#050508',
-                            darkest: '#020204',
-                            cyan: '#00f0ff',
-                            green: '#00ff88',
-                            red: '#ff2d6a',
-                            purple: '#b829ff',
-                            yellow: '#ffe600',
-                            orange: '#ff8c00',
-                            gray: '#1a1a2e',
-                            lightgray: '#2a2a4e',
+                        dark: {
+                            900: '#0a0a0a',
+                            800: '#111111',
+                            700: '#1a1a1a',
+                            600: '#222222',
+                            500: '#2a2a2a',
+                            400: '#333333',
+                            300: '#444444',
+                            200: '#555555',
+                            100: '#888888',
+                            50: '#cccccc',
+                        },
+                        accent: {
+                            DEFAULT: '#ffffff',
+                            muted: '#888888',
                         }
                     },
                     fontFamily: {
@@ -38,22 +42,17 @@
                         rajdhani: ['Rajdhani', 'sans-serif'],
                     },
                     animation: {
-                        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-                        'scan': 'scan 4s linear infinite',
-                        'float': 'float 3s ease-in-out infinite',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
                     },
                     keyframes: {
-                        'pulse-glow': {
-                            '0%, 100%': { opacity: '1', boxShadow: '0 0 20px currentColor' },
-                            '50%': { opacity: '0.5', boxShadow: '0 0 40px currentColor' },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
                         },
-                        'scan': {
-                            '0%': { transform: 'translateX(-100%)' },
-                            '100%': { transform: 'translateX(100%)' },
-                        },
-                        'float': {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
                         }
                     }
                 }
@@ -61,183 +60,433 @@
         }
     </script>
     <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #0a0a0a;
+            --border-color: #333333;
+            --border-light: #444444;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #555555;
+            --accent-color: #ffffff;
+            --hover-bg: #222222;
+            --focus-ring: rgba(255, 255, 255, 0.2);
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --transition-speed: 0.3s;
+        }
+
+        .light-mode {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #eeeeee;
+            --bg-card: #ffffff;
+            --border-color: #e0e0e0;
+            --border-light: #dddddd;
+            --text-primary: #000000;
+            --text-secondary: #555555;
+            --text-muted: #999999;
+            --accent-color: #000000;
+            --hover-bg: #f0f0f0;
+            --focus-ring: rgba(0, 0, 0, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            transition: background-color var(--transition-speed) ease,
+                        border-color var(--transition-speed) ease,
+                        color var(--transition-speed) ease,
+                        box-shadow var(--transition-speed) ease;
+        }
+
         body {
-            background: linear-gradient(135deg, #020204 0%, #050508 30%, #0a0a0f 50%, #050508 70%, #020204 100%);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
         }
-        .glow-cyan {
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 40px rgba(0, 240, 255, 0.1), inset 0 0 30px rgba(0, 240, 255, 0.05);
+
+        .bg-primary { background-color: var(--bg-primary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .bg-tertiary { background-color: var(--bg-tertiary); }
+        .bg-card { background-color: var(--bg-card); }
+
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .text-muted { color: var(--text-muted); }
+        .text-accent { color: var(--accent-color); }
+
+        .border-default { border-color: var(--border-color); }
+        .border-light { border-color: var(--border-light); }
+
+        .hover-bg:hover { background-color: var(--hover-bg); }
+        .focus-ring:focus { box-shadow: 0 0 0 3px var(--focus-ring); }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
         }
-        .glow-green {
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1), inset 0 0 30px rgba(0, 255, 136, 0.05);
+
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
-        .glow-red {
-            box-shadow: 0 0 20px rgba(255, 45, 106, 0.3), 0 0 40px rgba(255, 45, 106, 0.1), inset 0 0 30px rgba(255, 45, 106, 0.05);
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--shadow-color);
+            border-color: var(--border-light);
         }
-        .glow-purple {
-            box-shadow: 0 0 20px rgba(184, 41, 255, 0.3), 0 0 40px rgba(184, 41, 255, 0.1), inset 0 0 30px rgba(184, 41, 255, 0.05);
-        }
-        .glow-orange {
-            box-shadow: 0 0 20px rgba(255, 140, 0, 0.3), 0 0 40px rgba(255, 140, 0, 0.1), inset 0 0 30px rgba(255, 140, 0, 0.05);
-        }
-        .scan-line {
-            position: relative;
-            overflow: hidden;
-        }
-        .scan-line::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.05), rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.05), transparent);
-            animation: scan 4s linear infinite;
-        }
-        @keyframes scan {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-        .data-card {
-            background: linear-gradient(145deg, rgba(26, 26, 46, 0.9), rgba(10, 10, 15, 0.95));
-            border: 1px solid rgba(0, 240, 255, 0.15);
-            backdrop-filter: blur(10px);
-        }
-        .neon-text {
-            text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor, 0 0 40px currentColor;
-        }
-        .neon-border {
-            border: 1px solid rgba(0, 240, 255, 0.5);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3), inset 0 0 10px rgba(0, 240, 255, 0.1);
-        }
-        input[type="range"] {
-            -webkit-appearance: none;
-            background: transparent;
-        }
-        input[type="range"]::-webkit-slider-track {
-            height: 6px;
-            background: linear-gradient(90deg, #1a1a2e, #00f0ff33);
-            border-radius: 3px;
-            border: 1px solid rgba(0, 240, 255, 0.2);
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: linear-gradient(145deg, #00f0ff, #0080ff);
-            border-radius: 50%;
+
+        .btn {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s ease;
         }
-        .zone-bar {
-            transition: width 0.5s ease-out;
+        .btn:hover {
+            background-color: var(--hover-bg);
+            border-color: var(--border-light);
         }
-        .pulse-dot {
-            animation: pulse 1.5s ease-in-out infinite;
+        .btn:active {
+            transform: scale(0.98);
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.3); }
+        .btn-primary {
+            background-color: var(--text-primary);
+            color: var(--bg-primary);
+            border-color: var(--text-primary);
         }
-        .grid-bg {
-            background-image: 
-                linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
-            background-size: 40px 40px;
+        .btn-primary:hover {
+            background-color: var(--text-secondary);
+            border-color: var(--text-secondary);
         }
+
+        .input {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .input:focus {
+            border-color: var(--text-secondary);
+            box-shadow: 0 0 0 3px var(--focus-ring);
+        }
+        .input::placeholder {
+            color: var(--text-muted);
+        }
+
         .nav-item {
             position: relative;
-            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .nav-item:hover {
+            color: var(--text-primary);
+        }
+        .nav-item.active {
+            color: var(--text-primary);
         }
         .nav-item::after {
             content: '';
             position: absolute;
             bottom: 0;
-            left: 0;
+            left: 50%;
+            transform: translateX(-50%);
             width: 0;
             height: 2px;
-            background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+            background-color: var(--text-primary);
             transition: width 0.3s ease;
         }
         .nav-item:hover::after,
         .nav-item.active::after {
-            width: 100%;
+            width: 80%;
         }
-        .sub-nav-item {
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .range-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            outline: none;
+        }
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        .range-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .table-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .table-header {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .table-row {
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        .table-row:hover {
+            background-color: var(--hover-bg);
+        }
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .tab-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: var(--border-light);
+        }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .theme-toggle {
+            width: 60px;
+            height: 32px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle-knob {
+            width: 26px;
+            height: 26px;
+            background-color: var(--text-primary);
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .light-mode .theme-toggle-knob {
+            transform: translateX(28px);
+        }
+
+        .pulse-indicator {
+            width: 8px;
+            height: 8px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .zone-indicator {
+            height: 24px;
+            border-radius: 4px;
+            transition: width 0.5s ease-out;
+        }
+        .zone-1 { background-color: #888888; }
+        .zone-2 { background-color: #aaaaaa; }
+        .zone-3 { background-color: #cccccc; }
+        .zone-4 { background-color: #eeeeee; }
+        .zone-5 { background-color: #ffffff; }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            word-wrap: break-word;
+        }
+        .chat-user {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-bottom-right-radius: 4px;
+        }
+        .chat-ai {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .quick-btn {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
             transition: all 0.2s ease;
         }
-        .sub-nav-item:hover {
-            background: rgba(0, 240, 255, 0.1);
-            transform: translateX(5px);
+        .quick-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+            border-color: var(--border-light);
         }
-        .tab-content {
-            animation: fadeIn 0.3s ease;
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .status-online {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
         }
-        .scrollbar-thin::-webkit-scrollbar {
-            width: 6px;
+        .status-offline {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
         }
-        .scrollbar-thin::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 3px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-            background: rgba(0, 240, 255, 0.3);
-            border-radius: 3px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 240, 255, 0.5);
+
+        @media (prefers-color-scheme: light) {
+            :root:not(.dark-mode):not(.light-mode) {
+                --bg-primary: #ffffff;
+                --bg-secondary: #f5f5f5;
+                --bg-tertiary: #eeeeee;
+                --bg-card: #ffffff;
+                --border-color: #e0e0e0;
+                --border-light: #dddddd;
+                --text-primary: #000000;
+                --text-secondary: #555555;
+                --text-muted: #999999;
+                --accent-color: #000000;
+                --hover-bg: #f0f0f0;
+                --focus-ring: rgba(0, 0, 0, 0.1);
+                --shadow-color: rgba(0, 0, 0, 0.1);
+            }
         }
     </style>
 </head>
-<body class="font-rajdhani text-white grid-bg">
+<body class="font-rajdhani text-primary bg-primary scrollbar-custom">
     <div class="min-h-screen flex flex-col">
-        <header class="bg-cyber-dark/80 backdrop-blur-md border-b border-cyber-cyan/20 sticky top-0 z-40">
+        <header class="bg-secondary/80 backdrop-blur-md border-b border-default sticky top-0 z-40">
             <div class="container mx-auto px-4 py-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyber-cyan to-cyber-green flex items-center justify-center">
-                            <span class="font-orbitron text-xl">M</span>
+                        <div class="w-10 h-10 rounded-lg bg-tertiary flex items-center justify-center">
+                            <span class="font-orbitron text-xl text-primary">M</span>
                         </div>
                         <div>
-                            <h1 class="font-orbitron text-xl font-black tracking-wider text-cyber-cyan neon-text">
-                                MARATHON<span class="text-cyber-green">//</span>TRAINER
+                            <h1 class="font-orbitron text-xl font-black tracking-wider text-primary">
+                                MARATHON<span class="text-secondary mx-1">//</span>TRAINER
                             </h1>
-                            <p class="text-gray-500 text-xs tracking-widest">PRO TRAINING SYSTEM</p>
+                            <p class="text-muted text-xs tracking-widest">PRO TRAINING SYSTEM</p>
                         </div>
                     </div>
-                    <button onclick="showApiKeyModal()" class="p-2 text-gray-400 hover:text-cyber-cyan transition-colors" title="API 设置">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                    </button>
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-muted text-sm">🌓</span>
+                            <div class="theme-toggle" onclick="toggleTheme()" role="button" aria-label="切换主题">
+                                <div class="theme-toggle-knob">
+                                    <span class="text-xs">🌙</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="showApiKeyModal()" class="p-2 text-secondary hover:text-primary transition-colors" title="API 设置">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <nav class="bg-cyber-dark/60 backdrop-blur-md border-b border-cyber-cyan/10">
+        <nav class="bg-secondary/60 backdrop-blur-md border-b border-default">
             <div class="container mx-auto px-4">
-                <div class="flex flex-wrap">
-                    <button onclick="showTab('profile')" class="nav-item active px-6 py-3 font-orbitron text-sm tracking-wider text-cyber-cyan">
-                        👤 个人档案
-                    </button>
-                    <button onclick="showTab('heartRate')" class="nav-item px-6 py-3 font-orbitron text-sm tracking-wider text-gray-400 hover:text-cyber-green transition-colors">
-                        ❤️ 心率分析
-                    </button>
-                    <button onclick="showTab('training')" class="nav-item px-6 py-3 font-orbitron text-sm tracking-wider text-gray-400 hover:text-cyber-purple transition-colors">
-                        📝 训练记录
-                    </button>
-                    <button onclick="showTab('analytics')" class="nav-item px-6 py-3 font-orbitron text-sm tracking-wider text-gray-400 hover:text-cyber-orange transition-colors">
-                        📊 数据分析
-                    </button>
-                    <button onclick="showTab('ai')" class="nav-item px-6 py-3 font-orbitron text-sm tracking-wider text-gray-400 hover:text-cyber-yellow transition-colors">
-                        🤖 AI助手
-                    </button>
+                <div class="flex flex-wrap items-center justify-between">
+                    <div class="flex flex-wrap">
+                        <button onclick="showTab('profile')" class="nav-item active font-orbitron text-sm tracking-wider">
+                            👤 个人档案
+                        </button>
+                        <button onclick="showTab('heartRate')" class="nav-item font-orbitron text-sm tracking-wider">
+                            ❤️ 心率分析
+                        </button>
+                        <button onclick="showTab('training')" class="nav-item font-orbitron text-sm tracking-wider">
+                            📝 训练记录
+                        </button>
+                        <button onclick="showTab('analytics')" class="nav-item font-orbitron text-sm tracking-wider">
+                            📊 数据分析
+                        </button>
+                        <button onclick="showTab('ai')" class="nav-item font-orbitron text-sm tracking-wider">
+                            🤖 AI助手
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-4 ml-auto">
+                        <span id="onlineStatus" class="text-secondary text-sm font-mono flex items-center gap-2">
+                            <span class="pulse-indicator"></span>
+                            <span id="statusText">在线</span>
+                        </span>
+                        <span class="text-muted text-xs">v2.0</span>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -246,7 +495,7 @@
             <div id="profileTab" class="tab-content">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2">
-                        <div class="data-card rounded-2xl p-6 glow-cyan">
+                        <div class="card">
                             <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
                                 <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
                                 基本信息
@@ -275,7 +524,7 @@
                         </div>
                     </div>
                     
-                    <div class="data-card rounded-2xl p-6 glow-purple">
+                    <div class="card">
                         <h2 class="font-orbitron text-xl text-cyber-purple mb-6 flex items-center gap-3">
                             <span class="w-2 h-2 bg-cyber-purple rounded-full pulse-dot"></span>
                             跑步 PB 记录
@@ -308,7 +557,7 @@
 
             <div id="heartRateTab" class="tab-content hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="data-card rounded-2xl p-6 glow-cyan">
+                    <div class="card">
                         <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
                             <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
                             心率设置
@@ -331,7 +580,7 @@
                         </div>
                     </div>
 
-                    <div class="data-card rounded-2xl p-6 glow-green">
+                    <div class="card">
                         <h2 class="font-orbitron text-xl text-cyber-green mb-6 flex items-center gap-3">
                             <span class="w-2 h-2 bg-cyber-green rounded-full pulse-dot"></span>
                             心率区间计算
@@ -350,7 +599,7 @@
             </div>
 
             <div id="trainingTab" class="tab-content hidden">
-                <div class="data-card rounded-2xl p-6 glow-purple mb-8">
+                <div class="card p-6 mb-8">
                     <h2 class="font-orbitron text-xl text-cyber-purple mb-6 flex items-center gap-3">
                         <span class="w-2 h-2 bg-cyber-purple rounded-full pulse-dot"></span>
                         添加训练记录
@@ -389,7 +638,7 @@
                     </div>
                 </div>
 
-                <div class="data-card rounded-2xl p-6 glow-cyan">
+                <div class="card">
                     <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
                         <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
                         训练历史 <span id="recordCount" class="text-sm text-gray-500 font-rajdhani ml-2">(0 条记录)</span>
@@ -419,7 +668,7 @@
             </div>
 
             <div id="analyticsTab" class="tab-content hidden">
-                <div class="data-card rounded-2xl p-6 glow-red mb-8">
+                <div class="card p-6 mb-8">
                     <h2 class="font-orbitron text-xl text-cyber-red mb-6 flex items-center gap-3">
                         <span class="w-2 h-2 bg-cyber-red rounded-full pulse-dot"></span>
                         实时配速计算器
@@ -448,7 +697,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    <div class="data-card rounded-2xl p-6 glow-cyan">
+                    <div class="card">
                         <h2 class="font-orbitron text-xl text-cyber-cyan mb-6 flex items-center gap-3">
                             <span class="w-2 h-2 bg-cyber-cyan rounded-full pulse-dot"></span>
                             训练里程趋势
@@ -458,7 +707,7 @@
                         </div>
                     </div>
 
-                    <div class="data-card rounded-2xl p-6 glow-green">
+                    <div class="card">
                         <h2 class="font-orbitron text-xl text-cyber-green mb-6 flex items-center gap-3">
                             <span class="w-2 h-2 bg-cyber-green rounded-full pulse-dot"></span>
                             心率分布统计
@@ -470,7 +719,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="data-card rounded-2xl p-6 glow-purple">
+                    <div class="card">
                         <h2 class="font-orbitron text-xl text-cyber-purple mb-6 flex items-center gap-3">
                             <span class="w-2 h-2 bg-cyber-purple rounded-full pulse-dot"></span>
                             配速分析
@@ -480,7 +729,7 @@
                         </div>
                     </div>
 
-                    <div class="data-card rounded-2xl p-6 glow-red">
+                    <div class="card">
                         <h2 class="font-orbitron text-xl text-cyber-red mb-6 flex items-center gap-3">
                             <span class="w-2 h-2 bg-cyber-red rounded-full pulse-dot"></span>
                             心率区间分布
@@ -493,7 +742,7 @@
             </div>
 
             <div id="aiTab" class="tab-content hidden">
-                <div class="data-card rounded-2xl p-6 glow-green">
+                <div class="card">
                     <h2 class="font-orbitron text-xl text-cyber-green mb-6 flex items-center gap-3">
                         <span class="w-2 h-2 bg-cyber-green rounded-full pulse-dot"></span>
                         AI 训练助手
@@ -554,7 +803,7 @@
         </footer>
 
         <div id="apiKeyModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden items-center justify-center">
-            <div class="data-card rounded-2xl p-8 max-w-md w-full mx-4 glow-cyan">
+            <div class="card p-8 max-w-md w-full mx-4">
                 <h2 class="font-orbitron text-2xl text-cyber-cyan mb-6 text-center">API 设置</h2>
                 <p class="text-gray-400 text-sm mb-6">
                     请输入你的 DeepSeek API Key，用于启用 AI 训练助手功能。
@@ -610,7 +859,46 @@
         let deferredPrompt;
         let charts = {};
 
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme) {
+                document.documentElement.classList.remove('dark-mode', 'light-mode');
+                document.documentElement.classList.add(savedTheme);
+            } else if (!prefersDark) {
+                document.documentElement.classList.add('light-mode');
+            }
+            
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (!localStorage.getItem('theme')) {
+                    document.documentElement.classList.remove('dark-mode', 'light-mode');
+                    if (e.matches) {
+                        document.documentElement.classList.add('dark-mode');
+                    } else {
+                        document.documentElement.classList.add('light-mode');
+                    }
+                }
+            });
+        }
+
+        function toggleTheme() {
+            const isDark = !document.documentElement.classList.contains('light-mode');
+            
+            document.documentElement.classList.remove('dark-mode', 'light-mode');
+            
+            if (isDark) {
+                document.documentElement.classList.add('light-mode');
+                localStorage.setItem('theme', 'light-mode');
+            } else {
+                document.documentElement.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+            }
+        }
+
         function init() {
+            initTheme();
+            
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('trainingDate').value = today;
             
@@ -639,8 +927,18 @@
 
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('SW registered'))
-                    .catch(err => console.log('SW registration failed:', err));
+                    .then(reg => {
+                        console.log('✅ Service Worker 已注册');
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showUpdateBanner();
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => console.log('❌ SW 注册失败:', err));
             }
 
             window.addEventListener('beforeinstallprompt', (e) => {
@@ -649,7 +947,40 @@
                 setTimeout(() => showInstallBanner(), 3000);
             });
 
+            window.addEventListener('online', () => {
+                showOnlineStatus(true);
+            });
+            
+            window.addEventListener('offline', () => {
+                showOnlineStatus(false);
+            });
+
             initCharts();
+        }
+
+        function showOnlineStatus(isOnline) {
+            const statusEl = document.getElementById('onlineStatus');
+            const statusText = document.getElementById('statusText');
+            if (statusEl) {
+                const indicator = statusEl.querySelector('.pulse-indicator');
+                if (indicator) {
+                    indicator.style.backgroundColor = isOnline ? '#22c55e' : '#ef4444';
+                }
+            }
+            if (statusText) {
+                statusText.textContent = isOnline ? '在线' : '离线';
+            }
+        }
+
+        function showUpdateBanner() {
+            const banner = document.createElement('div');
+            banner.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-cyan-500 to-green-500 text-gray-900 px-6 py-3 rounded-full font-bold shadow-lg z-50 animate-pulse';
+            banner.innerHTML = '📱 有更新！点击刷新';
+            banner.onclick = () => {
+                window.location.reload();
+            };
+            document.body.appendChild(banner);
+            setTimeout(() => banner.remove(), 10000);
         }
 
         function showTab(tabId) {

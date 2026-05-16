@@ -1,22 +1,102 @@
 {
   "name": "Marathon Trainer",
   "short_name": "Marathon",
-  "description": "专业马拉松训练数据分析系统",
-  "start_url": "/index.html",
+  "description": "专业马拉松训练数据分析系统 - 记录配速、心率、训练计划",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0f",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "background_color": "#020204",
   "theme_color": "#00f0ff",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "zh-CN",
+  "categories": ["health", "fitness", "sports"],
   "icons": [
+    {
+      "src": "icons/icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "icons/screenshot-1.png",
+      "sizes": "1242x2688",
+      "type": "image/png",
+      "label": "训练记录界面"
+    },
+    {
+      "src": "icons/screenshot-2.png",
+      "sizes": "1242x2688",
+      "type": "image/png",
+      "label": "数据分析图表"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "训练记录",
+      "short_name": "记录",
+      "description": "快速添加训练记录",
+      "url": "/?tab=training",
+      "icons": [{"src": "icons/icon-96.png", "sizes": "96x96"}]
+    },
+    {
+      "name": "AI助手",
+      "short_name": "AI",
+      "description": "智能训练建议",
+      "url": "/?tab=ai",
+      "icons": [{"src": "icons/icon-96.png", "sizes": "96x96"}]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }
