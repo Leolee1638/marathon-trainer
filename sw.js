@@ -1,4 +1,4 @@
-const CACHE_NAME = 'marathon-trainer-v2';
+const CACHE_NAME = 'marathon-trainer-v3';
 const CACHE_ASSETS = [
   '/',
   '/index.html'
