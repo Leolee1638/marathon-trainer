@@ -1520,6 +1520,13 @@
             
             if (!message) return;
             
+            const apiKey = localStorage.getItem('deepseek_api_key');
+            if (!apiKey) {
+                alert('请先设置 DeepSeek API Key 才能使用 AI 助手功能');
+                showApiKeyModal();
+                return;
+            }
+            
             const chatMessages = document.getElementById('chatMessages');
             
             chatMessages.innerHTML += `
@@ -1536,49 +1543,105 @@
             input.value = '';
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
+            const loadingMsgId = 'loading-' + Date.now();
             chatMessages.innerHTML += `
-                <div class="flex gap-3">
+                <div class="flex gap-3" id="${loadingMsgId}">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-green to-cyber-cyan flex items-center justify-center flex-shrink-0">
                         <span class="font-orbitron text-lg pulse-dot">AI</span>
                     </div>
                     <div class="bg-cyber-gray rounded-lg px-4 py-3 max-w-[80%]">
                         <p class="text-gray-200 text-sm">
-                            <span class="inline-block animate-pulse">思考中...</span>
+                            <span class="inline-block animate-pulse">正在连接 DeepSeek...</span>
                         </p>
                     </div>
                 </div>
             `;
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
-            setTimeout(() => {
-                const lastMsg = chatMessages.lastElementChild;
-                lastMsg.innerHTML = `
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-green to-cyber-cyan flex items-center justify-center flex-shrink-0">
-                        <span class="font-orbitron text-lg">AI</span>
-                    </div>
-                    <div class="bg-cyber-gray rounded-lg px-4 py-3 max-w-[80%]">
-                        <p class="text-gray-200 text-sm">${generateResponse(message)}</p>
-                    </div>
-                `;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 1500);
+            callDeepSeekAPI(message, apiKey, loadingMsgId)
+                .then(response => {
+                    const loadingEl = document.getElementById(loadingMsgId);
+                    if (loadingEl) {
+                        loadingEl.innerHTML = `
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-green to-cyber-cyan flex items-center justify-center flex-shrink-0">
+                                <span class="font-orbitron text-lg">AI</span>
+                            </div>
+                            <div class="bg-cyber-gray rounded-lg px-4 py-3 max-w-[80%]">
+                                <p class="text-gray-200 text-sm whitespace-pre-wrap">${response}</p>
+                            </div>
+                        `;
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                })
+                .catch(error => {
+                    const loadingEl = document.getElementById(loadingMsgId);
+                    if (loadingEl) {
+                        loadingEl.innerHTML = `
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyber-red to-cyber-orange flex items-center justify-center flex-shrink-0">
+                                <span class="font-orbitron text-lg">!</span>
+                            </div>
+                            <div class="bg-cyber-red/20 border border-cyber-red/30 rounded-lg px-4 py-3 max-w-[80%]">
+                                <p class="text-gray-200 text-sm">❌ 请求失败: ${error.message}</p>
+                                <button onclick="showApiKeyModal()" class="mt-2 text-cyber-cyan hover:underline text-xs">检查 API Key 设置</button>
+                            </div>
+                        `;
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                });
         }
 
-        function generateResponse(message) {
-            const responses = {
-                weekly: '📅 **周训练计划建议**\n\n- 周一：轻松跑 6-8公里（心率Zone 2）\n- 周二：强度训练（间歇跑 6x400米）\n- 周三：恢复跑 4-5公里（心率Zone 1）\n- 周四：节奏跑 8-10公里（心率Zone 3-4）\n- 周五：休息或交叉训练\n- 周六：长距离跑 15-20公里（心率Zone 2）\n- 周日：恢复跑 5公里或休息',
-                pace: '⚡ **提高配速建议**\n\n1. **间歇训练**：800米/1000米间歇，每组之间恢复2-3分钟\n2. **节奏跑**：以马拉松配速+10秒的速度持续跑30-45分钟\n3. **法特莱克跑**：变速跑训练，快段1-2分钟配速跑+慢段2-3分钟恢复\n4. **下坡跑**：利用下坡练习步频和放松技术',
-                longrun: '🏃 **长距离训练建议**\n\n1. **频率**：每周1次，逐步增加距离\n2. **配速**：比马拉松目标配速慢30-60秒/公里\n3. **补给**：每45-60分钟补充能量胶和水\n4. **节奏**：保持稳定，不要忽快忽慢\n5. **恢复**：长距离后第二天进行恢复跑或休息',
-                recovery: '🧘 **恢复建议**\n\n1. **主动恢复**：散步、瑜伽、游泳等低强度活动\n2. **拉伸**：重点拉伸大腿前侧、后侧、小腿\n3. **营养**：补充蛋白质和碳水化合物\n4. **睡眠**：保证7-9小时高质量睡眠\n5. **按摩**：泡沫轴放松肌肉',
-                default: '感谢你的提问！以下是一些通用的马拉松训练建议：\n\n**训练原则**：\n- 循序渐进：每周跑量增幅不超过10%\n- 多样化训练：结合轻松跑、节奏跑、间歇跑\n- 劳逸结合：不要连续高强度训练\n- 倾听身体：疲劳时及时休息\n\n**装备建议**：\n- 跑鞋：选择适合自己脚型的跑鞋，500-800公里更换\n- 服装：速干透气材质\n- 配件：心率带、跑步手表、反光装备\n\n需要更具体的建议，请告诉我你的目标！'
-            };
-            
-            const lowerMsg = message.toLowerCase();
-            if (lowerMsg.includes('周') || lowerMsg.includes('计划') || lowerMsg.includes('每周')) return responses.weekly;
-            if (lowerMsg.includes('配速') || lowerMsg.includes('速度') || lowerMsg.includes('快')) return responses.pace;
-            if (lowerMsg.includes('长') || lowerMsg.includes('距离') || lowerMsg.includes('LSD')) return responses.longrun;
-            if (lowerMsg.includes('恢复') || lowerMsg.includes('放松') || lowerMsg.includes('休息')) return responses.recovery;
-            return responses.default;
+        async function callDeepSeekAPI(message, apiKey, loadingMsgId) {
+            const systemPrompt = `你是马拉松训练专家 AI 助手，专门帮助用户进行科学的马拉松训练。请根据用户的问题提供专业、实用的建议。
+
+你的专长包括：
+- 训练计划制定（周训练计划、周期化训练）
+- 配速和速度训练技巧
+- 长距离跑训练（LSD）
+- 恢复和休息建议
+- 心率区间训练
+- 营养和补给策略
+- 伤病预防
+- 比赛策略
+
+请用中文回答，回答要专业但易懂，可以适当使用 emoji 增强可读性。如果涉及具体数据（如配速、心率等），请根据用户的个人信息（如年龄、体重、目标等）给出个性化建议。`;
+
+            try {
+                const response = await fetch('https://api.deepseek.com/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: message }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 2000,
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error?.message || `API 请求失败 (${response.status})`);
+                }
+
+                const data = await response.json();
+                
+                if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+                    return data.choices[0].message.content;
+                } else {
+                    throw new Error('API 返回数据格式异常');
+                }
+            } catch (error) {
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    throw new Error('网络连接失败，请检查网络或 CORS 设置');
+                }
+                throw error;
+            }
         }
 
         function quickQuestion(type) {
