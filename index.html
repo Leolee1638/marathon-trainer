@@ -1725,10 +1725,16 @@
 
                 const data = await response.json();
                 
-                if (data.output && data.output.choices && data.output.choices.length > 0 && data.output.choices[0].message) {
+                console.log('API 返回数据:', data);
+                
+                if (data.output && data.output.text) {
+                    return data.output.text;
+                } else if (data.output && data.output.choices && data.output.choices.length > 0 && data.output.choices[0].message) {
                     return data.output.choices[0].message.content;
+                } else if (data.result && data.result.content) {
+                    return data.result.content;
                 } else {
-                    throw new Error('API 返回数据格式异常');
+                    throw new Error('API 返回数据格式异常\n请检查控制台查看详细返回数据');
                 }
             } catch (error) {
                 if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
@@ -1957,10 +1963,16 @@
 
             const data = await response.json();
             
-            if (data.output && data.output.choices && data.output.choices.length > 0 && data.output.choices[0].message) {
+            console.log('跑姿分析 API 返回数据:', data);
+            
+            if (data.output && data.output.text) {
+                return data.output.text;
+            } else if (data.output && data.output.choices && data.output.choices.length > 0 && data.output.choices[0].message) {
                 return data.output.choices[0].message.content;
+            } else if (data.result && data.result.content) {
+                return data.result.content;
             } else {
-                throw new Error('API 返回数据格式异常');
+                throw new Error('API 返回数据格式异常\n请检查控制台查看详细返回数据');
             }
         }
 
