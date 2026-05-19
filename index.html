@@ -1989,13 +1989,26 @@
             const recommendationsDiv = document.getElementById('analysisRecommendations');
             const recommendationsList = document.getElementById('recommendationsList');
             
-            const resultText = typeof result === 'object' ? JSON.stringify(result, null, 2) : result;
+            let resultText = '';
+            if (typeof result === 'object') {
+                if (result.output && result.output.text) {
+                    resultText = result.output.text;
+                } else if (result.text) {
+                    resultText = result.text;
+                } else {
+                    resultText = JSON.stringify(result, null, 2);
+                }
+            } else {
+                resultText = result;
+            }
+            
+            resultText = resultText.replace(/\\n/g, '\n').replace(/\\r/g, '').replace(/"/g, '');
             
             resultDiv.innerHTML = `
                 <div class="prose prose-invert max-w-none">
                     <h3 class="text-lg font-orbitron text-cyber-green mb-4">🏃 AI 跑姿分析报告</h3>
                     <div class="bg-cyber-dark rounded-lg p-4 border border-cyber-green/20">
-                        <pre class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap font-mono">${resultText}</pre>
+                        <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">${resultText}</p>
                     </div>
                 </div>
             `;
